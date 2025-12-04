@@ -52,7 +52,8 @@ const allowedOrigins = [
 app.use(cors({
   origin: allowedOrigins,
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Authorization', 'Content-Type']
+  allowedHeaders: ['Authorization', 'Content-Type'],
+  credentials: true
 }));
 
 const io = new SocketIOServer(server, {
@@ -110,7 +111,7 @@ app.use(errorHandler);
 export default app;
 
 // Jika running lokal (bukan di Vercel)
-if (process.env.NODE_ENV !== 'production') {
+if (!process.env.VERCEL) {
   const PORT = env.PORT || 4000;
   server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
