@@ -106,7 +106,13 @@ io.on('connection', (socket) => {
 // Error handler middleware (harus di paling akhir)
 app.use(errorHandler);
 
-const PORT = env.PORT || 4000;
-server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+// Export untuk Vercel serverless
+export default app;
+
+// Jika running lokal (bukan di Vercel)
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = env.PORT || 4000;
+  server.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+}
