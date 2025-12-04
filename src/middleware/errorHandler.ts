@@ -15,7 +15,7 @@ export function errorHandler(
   err: unknown,
   req: Request,
   res: Response,
-  next: Function
+  // next: Function
 ) {
   console.error(err); // Log error to console
   const status = typeof err === 'object' && err && 'status' in err ? (err as { status?: number }).status || 500 : 500;

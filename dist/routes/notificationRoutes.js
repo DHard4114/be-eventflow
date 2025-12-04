@@ -12,6 +12,61 @@ const notificationController_1 = require("../controllers/notificationController"
 const router = (0, express_1.Router)();
 /**
  * @swagger
+ * /notifications/custom/{eventId}:
+ *   post:
+ *     summary: Kirim notifikasi custom dari organizer ke participant event
+ *     tags:
+ *       - Notification
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID event
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               participantId:
+ *                 type: string
+ *                 description: ID participant event
+ *               title:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [GENERAL, EVENT_UPDATE, BROADCAST, SECURITY_ALERT]
+ *     responses:
+ *       200:
+ *         description: Notifikasi berhasil dikirim ke participant
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Notification'
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Participant not found
+ */
+router.post('/custom/:eventId', requireAuth_1.requireAuth, (0, requireRole_1.requireRole)(['ORGANIZER']), notificationController_1.sendCustomNotification);
+/**
+ * @swagger
  * /notifications/broadcast:
  *   post:
  *     summary: Broadcast notifikasi ke event
@@ -25,13 +80,10 @@ const router = (0, express_1.Router)();
  *           schema:
  *             type: object
  *             required:
- *               - category
  *               - message
  *               - title
  *             properties:
  *               eventId:
- *                 type: string
- *               category:
  *                 type: string
  *               message:
  *                 type: string
@@ -50,7 +102,7 @@ const router = (0, express_1.Router)();
 router.post('/broadcast', requireAuth_1.requireAuth, (0, requireRole_1.requireRole)(['ORGANIZER']), notificationController_1.createBroadcast);
 /**
  * @swagger
- * /notifications/event/{id}:
+ * /notifications/{id}:
  *   get:
  *     summary: Ambil semua notifikasi pada suatu event tertentu
  *     tags: [Notification]
@@ -69,5 +121,5 @@ router.post('/broadcast', requireAuth_1.requireAuth, (0, requireRole_1.requireRo
  *       401:
  *         description: Unauthorized
  */
-router.get('/event/:id', requireAuth_1.requireAuth, notificationController_1.getEventNotifications);
+router.get('/:id', requireAuth_1.requireAuth, notificationController_1.getEventNotifications);
 exports.default = router;

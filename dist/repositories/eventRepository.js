@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteEvent = exports.updateEvent = exports.isEventOrganizer = exports.isEventParticipant = exports.createEvent = exports.listEvents = exports.findEventById = void 0;
+exports.deleteEvent = exports.updateEvent = exports.isEventOrganizer = exports.createEvent = exports.listEvents = exports.findEventById = void 0;
 /**
  * File: eventRepository.ts
  * Author: eventFlow Team
@@ -24,18 +24,6 @@ const createEvent = async (data) => {
     return prisma_1.prisma.event.create({ data });
 };
 exports.createEvent = createEvent;
-const isEventParticipant = async (eventId, userId) => {
-    const participant = await prisma_1.prisma.eventParticipant.findUnique({
-        where: {
-            userId_eventId: {
-                userId,
-                eventId
-            }
-        }
-    });
-    return !!participant;
-};
-exports.isEventParticipant = isEventParticipant;
 const isEventOrganizer = async (eventId, userId) => {
     const event = await prisma_1.prisma.event.findUnique({
         where: { id: eventId },

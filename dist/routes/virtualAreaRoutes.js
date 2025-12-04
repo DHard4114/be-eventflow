@@ -11,7 +11,52 @@ const requireAuth_1 = require("../utils/requireAuth");
 const router = (0, express_1.Router)();
 /**
  * @swagger
- * /events/{id}/virtual-areas:
+ * /virtual-area/{eventId}/current:
+ *   get:
+ *     summary: Get user current virtual area by location
+ *     tags:
+ *       - VirtualArea
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID event
+ *     responses:
+ *       200:
+ *         description: Area virtual user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Lokasi user tidak ditemukan
+ *       500:
+ *         description: Server error
+ */
+router.get('/:eventId/current', virtualAreaController_1.getCurrentVirtualArea);
+/**
+ * @swagger
+ * /virtual-area/{eventId}:
  *   post:
  *     summary: Buat area virtual (geofence) pada event
  *     tags: [VirtualArea]
@@ -19,7 +64,7 @@ const router = (0, express_1.Router)();
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: eventId
  *         required: true
  *         schema:
  *           type: string
@@ -73,16 +118,16 @@ const router = (0, express_1.Router)();
  *       401:
  *         description: Unauthorized
 */
-router.post('/:id/virtual-areas', requireAuth_1.requireAuth, virtualAreaController_1.createVirtualArea);
+router.post('/:eventId', requireAuth_1.requireAuth, virtualAreaController_1.createVirtualArea);
 /**
  * @swagger
- * /events/{id}/virtual-areas:
+ * /virtual-area/{eventId}/get-all:
  *   get:
  *     summary: Ambil semua area virtual pada event
  *     tags: [VirtualArea]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: eventId
  *         required: true
  *         schema:
  *           type: string
@@ -91,16 +136,16 @@ router.post('/:id/virtual-areas', requireAuth_1.requireAuth, virtualAreaControll
  *       200:
  *         description: List area virtual event
 */
-router.get('/:id/virtual-areas', virtualAreaController_1.getVirtualAreas);
+router.get('/:eventId/get-all', virtualAreaController_1.getVirtualAreas);
 /**
  * @swagger
- * /events/{id}/virtual-areas/{areaId}:
+ * /virtual-area/{eventId}/{areaId}:
  *   get:
  *     summary: Ambil area virtual tertentu pada event
  *     tags: [VirtualArea]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: eventId
  *         required: true
  *         schema:
  *           type: string
@@ -117,16 +162,16 @@ router.get('/:id/virtual-areas', virtualAreaController_1.getVirtualAreas);
  *       404:
  *         description: Area virtual tidak ditemukan
  */
-router.get('/:id/virtual-areas/:areaId', virtualAreaController_1.getVirtualAreaById);
+router.get('/:eventId/:areaId', virtualAreaController_1.getVirtualAreaById);
 /**
  * @swagger
- * /events/{id}/virtual-areas/search:
+ * /virtual-area/{eventId}/search:
  *   get:
  *     summary: Cari area virtual yang mengandung lokasi user (geofencing)
  *     tags: [VirtualArea]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: eventId
  *         required: true
  *         schema:
  *           type: string
@@ -149,7 +194,7 @@ router.get('/:id/virtual-areas/:areaId', virtualAreaController_1.getVirtualAreaB
  *       404:
  *         description: Tidak ada area yang mengandung lokasi
 */
-router.get('/:id/virtual-areas/search', virtualAreaController_1.searchVirtualAreaByLocation);
+router.get('/:eventId/search', virtualAreaController_1.searchVirtualAreaByLocation);
 /**
  * @swagger
  * /events/virtual-areas/{areaId}:
@@ -180,7 +225,7 @@ router.get('/:id/virtual-areas/search', virtualAreaController_1.searchVirtualAre
 router.patch('/virtual-areas/:areaId', requireAuth_1.requireAuth, virtualAreaController_1.updateVirtualArea);
 /**
  * @swagger
- * /events/virtual-areas/{areaId}:
+ * /virtual-area/{areaId}:
  *   delete:
  *     summary: Hapus area virtual event
  *     tags: [VirtualArea]
@@ -199,5 +244,5 @@ router.patch('/virtual-areas/:areaId', requireAuth_1.requireAuth, virtualAreaCon
  *       401:
  *         description: Unauthorized
  */
-router.delete('/virtual-areas/:areaId', requireAuth_1.requireAuth, virtualAreaController_1.deleteVirtualArea);
+router.delete('/:areaId', requireAuth_1.requireAuth, virtualAreaController_1.deleteVirtualArea);
 exports.default = router;

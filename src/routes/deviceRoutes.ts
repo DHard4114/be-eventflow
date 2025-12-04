@@ -46,7 +46,7 @@ const router = Router();
  *       401:
  *         description: Unauthorized
  */
-router.post('/devices/register', registerDevice);
+router.post('/register', registerDevice);
 
 /**
  * @swagger
@@ -63,7 +63,7 @@ router.post('/devices/register', registerDevice);
  *       401:
  *         description: Unauthorized
  */
-router.get('/devices/me', getMyDevices);
+router.get('/me', getMyDevices);
 
 /**
  * @swagger
@@ -87,6 +87,6 @@ router.get('/devices/me', getMyDevices);
  *       401:
  *         description: Unauthorized
  */
-router.delete('/devices/:deviceId', deleteDevice);
+router.delete('/:deviceId', deleteDevice);
 
 export default router;

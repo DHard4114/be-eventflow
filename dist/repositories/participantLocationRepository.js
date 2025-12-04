@@ -22,11 +22,11 @@ const listParticipantLocations = async (eventId) => {
     return prisma_1.prisma.participantLocation.findMany({ where: { eventId } });
 };
 exports.listParticipantLocations = listParticipantLocations;
-const upsertParticipantLocation = async (userId, eventId, latitude, longitude) => {
+const upsertParticipantLocation = async (userId, eventId, latitude, longitude, lastGeofenceStatus) => {
     return prisma_1.prisma.participantLocation.upsert({
         where: { userId_eventId: { userId, eventId } },
-        update: { latitude, longitude, lastUpdatedAt: new Date() },
-        create: { userId, eventId, latitude, longitude },
+        update: { latitude, longitude, lastUpdatedAt: new Date(), lastGeofenceStatus },
+        create: { userId, eventId, latitude, longitude, lastGeofenceStatus },
     });
 };
 exports.upsertParticipantLocation = upsertParticipantLocation;

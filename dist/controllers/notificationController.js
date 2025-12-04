@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getEventNotifications = exports.createBroadcast = void 0;
+exports.getEventNotifications = exports.createBroadcast = exports.sendCustomNotification = void 0;
 const notificationRepository_1 = require("../repositories/notificationRepository");
 const userNotificationRepository_1 = require("../repositories/userNotificationRepository");
 const prisma_1 = require("../config/prisma");
@@ -9,6 +9,55 @@ const baseResponse_2 = require("../utils/baseResponse");
 const jwt_1 = require("../utils/jwt");
 const socket_1 = require("../utils/socket");
 const eventRepository_1 = require("../repositories/eventRepository");
+const eventParticipantRepository_1 = require("../repositories/eventParticipantRepository");
+const sendCustomNotification = async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        const payload = token ? (0, jwt_1.verifyJwt)(token) : null;
+        if (!payload || payload.role !== 'ORGANIZER') {
+            return res.status(403).json((0, baseResponse_2.errorResponse)('Forbidden: Only organizer can send custom notification.'));
+        }
+        const { eventId } = req.params;
+        const { participantId, title, message, type } = req.body;
+        if (!participantId || !title || !message || !type) {
+            return res.status(400).json((0, baseResponse_2.errorResponse)('participantId, title, message, type wajib diisi'));
+        }
+        // Validasi organizer event
+        const organizerValid = await (0, eventRepository_1.isEventOrganizer)(eventId, payload.userId);
+        if (!organizerValid) {
+            return res.status(403).json((0, baseResponse_2.errorResponse)('Forbidden: You are not the organizer of this event.'));
+        }
+        // Validasi participant aktif di event
+        const participant = await (0, eventParticipantRepository_1.findActiveEventParticipant)(participantId, eventId);
+        if (!participant) {
+            return res.status(404).json((0, baseResponse_2.errorResponse)('Participant not found or not active in this event.'));
+        }
+        // Buat notifikasi
+        const notif = await (0, notificationRepository_1.createNotification)({
+            title,
+            message,
+            type,
+            eventId,
+            userNotifications: {
+                create: [{ user: { connect: { id: participantId } } }]
+            }
+        });
+        // Emit real-time
+        (0, socket_1.emitNotification)({
+            id: notif.id,
+            title,
+            message,
+            type,
+            eventId,
+            createdAt: notif.createdAt
+        });
+        res.json((0, baseResponse_1.baseResponse)({ success: true, data: notif, message: 'Notifikasi berhasil dikirim ke participant.' }));
+    }
+    catch (err) {
+        res.status(500).json((0, baseResponse_2.errorResponse)(err instanceof Error ? err.message : 'Unknown error'));
+    }
+};
+exports.sendCustomNotification = sendCustomNotification;
 const createBroadcast = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
@@ -16,7 +65,7 @@ const createBroadcast = async (req, res, next) => {
         if (!payload)
             return res.status(401).json((0, baseResponse_2.errorResponse)('Unauthorized'));
         const { eventId, category, message, title, type } = req.body;
-        if (!eventId || !category || !message || !title)
+        if (!eventId || !message || !title)
             return res.status(400).json((0, baseResponse_2.errorResponse)('Missing fields'));
         // Validasi event dan hak broadcast
         const event = await (0, eventRepository_1.findEventById)(eventId);

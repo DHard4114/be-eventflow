@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.register = exports.deleteUser = exports.updateUser = void 0;
+exports.login = exports.register = exports.regitserAsOrganizer = exports.deleteUser = exports.updateUser = void 0;
 const userRepository_1 = require("../repositories/userRepository");
 const baseResponse_1 = require("../utils/baseResponse");
 const baseResponse_2 = require("../utils/baseResponse");
@@ -49,6 +49,36 @@ const deleteUser = async (req, res) => {
     }
 };
 exports.deleteUser = deleteUser;
+const regitserAsOrganizer = async (req, res) => {
+    try {
+        const { name, email, password, phoneNumber } = req.body;
+        if (!name || !email || !password)
+            return res.status(400).json((0, baseResponse_2.errorResponse)('Missing fields'));
+        const existing = await (0, userRepository_1.findUserByEmail)(email);
+        if (existing)
+            return res.status(409).json((0, baseResponse_2.errorResponse)('Email already registered'));
+        const passwordHash = await bcryptjs_1.default.hash(password, 10);
+        const userRaw = await (0, userRepository_1.createUser)({
+            name,
+            email,
+            passwordHash,
+            phoneNumber,
+            role: 'ORGANIZER',
+        });
+        const user = {
+            ...userRaw,
+            passwordHash: userRaw.passwordHash === null ? undefined : userRaw.passwordHash,
+            avatarUrl: userRaw.avatarUrl === null ? undefined : userRaw.avatarUrl,
+            phoneNumber: userRaw.phoneNumber === null ? undefined : userRaw.phoneNumber,
+            googleId: userRaw.googleId === null ? undefined : userRaw.googleId,
+        };
+        res.json((0, baseResponse_1.baseResponse)({ success: true, data: { user } }));
+    }
+    catch (err) {
+        res.status(500).json((0, baseResponse_2.errorResponse)(err));
+    }
+};
+exports.regitserAsOrganizer = regitserAsOrganizer;
 const register = async (req, res) => {
     try {
         const { name, email, password, phoneNumber } = req.body;
@@ -71,8 +101,8 @@ const register = async (req, res) => {
             phoneNumber: userRaw.phoneNumber === null ? undefined : userRaw.phoneNumber,
             googleId: userRaw.googleId === null ? undefined : userRaw.googleId,
         };
-        const token = (0, jwt_1.signJwt)({ userId: user.id, role: user.role });
-        res.json((0, baseResponse_1.baseResponse)({ success: true, data: { user, token } }));
+        // const token = signJwt({ userId: user.id, role: user.role });
+        res.json((0, baseResponse_1.baseResponse)({ success: true, data: { user } }));
     }
     catch (err) {
         res.status(500).json((0, baseResponse_2.errorResponse)(err));

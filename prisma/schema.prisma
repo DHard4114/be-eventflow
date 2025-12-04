@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -53,18 +54,22 @@ model Event {
   polls                Poll[]
   reports              Report[]
   virtualAreas         VirtualArea[]
+  importantSpots       ImportantSpot[]
 }
 
 model EventParticipant {
+  id               String   @id @default(cuid())
   joinedAt         DateTime @default(now())
   userId           String
   eventId          String
   nodeColor        String?
   attendanceStatus String?
+  isActive         Boolean  @default(true)
+  leftAt           DateTime?
   event            Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([userId, eventId])
+  @@unique([userId, eventId])
 }
 
 model ChatMessage {
@@ -122,19 +127,20 @@ model PollVote {
 }
 
 model Report {
-  id          String         @id @default(cuid())
-  category    ReportCategory
-  description String
-  latitude    Float
-  longitude   Float
-  status      ReportStatus   @default(PENDING)
-  reporterId  String
-  eventId     String
-  createdAt   DateTime       @default(now())
-  mediaUrls   Json?
-  adminNotes  String?
-  event       Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  reporter    User           @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  id             String           @id @default(cuid())
+  category       ReportCategory
+  description    String
+  latitude       Float
+  longitude      Float
+  status         ReportStatus     @default(PENDING)
+  reporterId     String
+  eventId        String
+  createdAt      DateTime         @default(now())
+  mediaUrls      Json?
+  adminNotes     String?
+  event          Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  reporter       User             @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  ReportAIResult ReportAIResult[]
 }
 
 model VirtualArea {
@@ -154,6 +160,7 @@ model ParticipantLocation {
   longitude     Float
   userId        String
   eventId       String
+  lastGeofenceStatus String? // Status geofence terakhir ('INSIDE' atau 'OUTSIDE')
   event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -199,6 +206,44 @@ model spatial_ref_sys {
   auth_srid Int?
   srtext    String? @db.VarChar(2048)
   proj4text String? @db.VarChar(2048)
+}
+
+model ReportAIResult {
+  id        String   @id @default(cuid())
+  reportId  String
+  createdAt DateTime @default(now())
+  aiType    String
+  aiPayload Json
+  status    String
+  errorMsg  String?
+  meta      Json?
+  Report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+}
+
+model ImportantSpot {
+  id         String   @id @default(cuid())
+  eventId    String
+  name       String
+  latitude   Float
+  longitude  Float
+  type       SpotType
+  customType String? // Jika type = OTHER, user bisa isi sendiri
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+enum SpotType {
+  ENTRY_GATE
+  EXIT_GATE
+  CHECKPOINT
+  SHELTER
+  INFO_CENTER
+  STAGE
+  REST_AREA
+  VIEW_POINT
+  DANGER_ZONE
+  MEETING_POINT
+  HOSPITAL
+  OTHER
 }
 
 enum Role {

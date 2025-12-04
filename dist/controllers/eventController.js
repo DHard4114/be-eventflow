@@ -33,13 +33,13 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unjoinEvent = exports.joinEvent = exports.updateAbsensi = exports.deleteEvent = exports.updateEvent = exports.listEvents = exports.getEvent = exports.createEvent = void 0;
+exports.finishEvent = exports.joinEvent = exports.updateAbsensi = exports.deleteEvent = exports.updateEvent = exports.listEvents = exports.getEvent = exports.createEvent = void 0;
 const eventRepository_1 = require("../repositories/eventRepository");
 const eventParticipantRepository_1 = require("../repositories/eventParticipantRepository");
 const baseResponse_1 = require("../utils/baseResponse");
 const baseResponse_2 = require("../utils/baseResponse");
-const eventParticipantRepository_2 = require("../repositories/eventParticipantRepository");
 const jwt_1 = require("../utils/jwt");
+const generateJoinCode_1 = require("../utils/generateJoinCode");
 const socket_1 = require("../utils/socket");
 const createEvent = async (req, res) => {
     try {
@@ -47,16 +47,16 @@ const createEvent = async (req, res) => {
         const payload = token ? (0, jwt_1.verifyJwt)(token) : null;
         if (!payload)
             return res.status(401).json((0, baseResponse_2.errorResponse)('Unauthorized'));
-        const { name, description, startTime, endTime, locationName, latitude, longitude, joinCode, } = req.body;
+        const { name, description, startTime, endTime, locationName, latitude, longitude, } = req.body;
         if (!name ||
             !startTime ||
             !endTime ||
             !locationName ||
             !latitude ||
-            !longitude ||
-            !joinCode) {
+            !longitude) {
             return res.status(400).json((0, baseResponse_2.errorResponse)('Missing fields'));
         }
+        const joinCode = (0, generateJoinCode_1.generateJoinCode)();
         const prismaEvent = await (0, eventRepository_1.createEvent)({
             name,
             description,
@@ -65,17 +65,13 @@ const createEvent = async (req, res) => {
             locationName,
             latitude,
             longitude,
-            joinCode,
+            joinCode, // Use the generated joinCode
             organizer: { connect: { id: payload.userId } },
         });
-        // ORGANIZER otomatis jadi peserta event
-        await (0, eventParticipantRepository_2.createEventParticipant)({
-            user: { connect: { id: payload.userId } },
-            event: { connect: { id: prismaEvent.id } },
-            joinedAt: new Date(),
-        });
+        // ORGANIZER otomatis jadi peserta event (single-record logic)
+        await (0, eventParticipantRepository_1.joinOrReactivateEventParticipant)(payload.userId, prismaEvent.id);
         // Update totalParticipants di Event setelah counting
-        const totalParticipants = await (0, eventParticipantRepository_2.countEventParticipants)(prismaEvent.id);
+        const totalParticipants = await (0, eventParticipantRepository_1.countEventParticipants)(prismaEvent.id);
         await (0, eventRepository_1.updateEvent)(prismaEvent.id, { totalParticipants });
         const updatedEvent = await (0, eventRepository_1.findEventById)(prismaEvent.id);
         const event = {
@@ -120,7 +116,7 @@ const listEvents = async (req, res) => {
             ...e,
             description: e.description ?? undefined,
             maxParticipants: e.maxParticipants ?? undefined,
-            totalParticipants: await (0, eventParticipantRepository_2.countEventParticipants)(e.id),
+            totalParticipants: await (0, eventParticipantRepository_1.countEventParticipants)(e.id),
         })));
         res.json((0, baseResponse_1.baseResponse)({ success: true, data: events }));
     }
@@ -138,6 +134,10 @@ const updateEvent = async (req, res) => {
         const { id } = req.params;
         const data = req.body;
         const prismaEvent = await (0, eventRepository_1.updateEvent)(id, data);
+        // Jika status event diubah ke ONGOING/UPCOMING, organizer otomatis aktif sebagai participant
+        if ((data.status === 'ONGOING' || data.status === 'UPCOMING') && prismaEvent.organizerId) {
+            await (0, eventParticipantRepository_1.joinOrReactivateEventParticipant)(prismaEvent.organizerId, id);
+        }
         const event = {
             ...prismaEvent,
             description: prismaEvent.description ?? undefined,
@@ -222,21 +222,18 @@ const joinEvent = async (req, res) => {
         const participantCount = participantList.length;
         if (event.maxParticipants && participantCount >= event.maxParticipants) {
             // Emit real-time notification to all clients
-            const { emitNotification } = await Promise.resolve().then(() => __importStar(require('../utils/socket')));
-            emitNotification({
+            // const { emitNotification } = await import('../utils/socket');
+            (0, socket_1.emitNotification)({
                 type: 'EVENT_FULL',
                 eventId: id,
                 message: 'Event sudah penuh, tidak bisa join lebih banyak peserta.',
             });
             return res.status(400).json((0, baseResponse_2.errorResponse)('Event sudah penuh'));
         }
-        // --- Create Participant ---
-        await (0, eventParticipantRepository_2.createEventParticipant)({
-            user: { connect: { id: payload.userId } },
-            event: { connect: { id } }
-        });
+        // --- Create/Reactivate Participant (single-record logic) ---
+        await (0, eventParticipantRepository_1.joinOrReactivateEventParticipant)(payload.userId, id);
         // Update totalParticipants di Event setelah counting
-        const totalParticipants = await (0, eventParticipantRepository_2.countEventParticipants)(id);
+        const totalParticipants = await (0, eventParticipantRepository_1.countEventParticipants)(id);
         await (0, eventRepository_1.updateEvent)(id, { totalParticipants });
         const eventAfterJoin = await (0, eventRepository_1.findEventById)(id);
         const eventResponse = {
@@ -252,28 +249,42 @@ const joinEvent = async (req, res) => {
     }
 };
 exports.joinEvent = joinEvent;
-const unjoinEvent = async (req, res) => {
+/**
+ * Selesaikan event: auto-unjoin semua peserta dan update status event
+ */
+const finishEvent = async (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         const payload = token ? (0, jwt_1.verifyJwt)(token) : null;
-        if (!payload)
-            return res.status(401).json((0, baseResponse_2.errorResponse)('Unauthorized'));
-        const { id } = req.params;
-        await (0, eventParticipantRepository_1.deleteEventParticipant)(payload.userId, id);
-        // Update totalParticipants di Event setelah counting
-        const totalParticipants = await (0, eventParticipantRepository_2.countEventParticipants)(id);
-        await (0, eventRepository_1.updateEvent)(id, { totalParticipants });
-        const eventAfterUnjoin = await (0, eventRepository_1.findEventById)(id);
-        const eventResponse = {
-            ...eventAfterUnjoin,
-            description: eventAfterUnjoin?.description ?? undefined,
-            maxParticipants: eventAfterUnjoin?.maxParticipants ?? undefined,
+        if (!payload || payload.role !== 'ORGANIZER') {
+            return res.status(403).json((0, baseResponse_2.errorResponse)('Forbidden: Only organizers can finish an event.'));
+        }
+        const { id: eventId } = req.params;
+        const event = await (0, eventRepository_1.findEventById)(eventId);
+        if (!event) {
+            return res.status(404).json((0, baseResponse_2.errorResponse)('Event not found'));
+        }
+        if (event.organizerId !== payload.userId) {
+            return res.status(403).json((0, baseResponse_2.errorResponse)('Forbidden: You are not the organizer of this event.'));
+        }
+        // Unjoin semua peserta aktif
+        const unjoinedCount = await (0, eventParticipantRepository_1.unjoinAllParticipantsByEventId)(eventId);
+        // Hitung ulang total peserta aktif (harusnya 0)
+        const totalParticipants = await (0, eventParticipantRepository_1.countEventParticipants)(eventId);
+        // Update status event menjadi COMPLETED dan totalParticipants
+        await (0, eventRepository_1.updateEvent)(eventId, { status: 'COMPLETED', totalParticipants });
+        (0, socket_1.emitEventUpdate)(eventId, {
+            ...event,
+            status: 'COMPLETED',
             totalParticipants,
-        };
-        res.json((0, baseResponse_1.baseResponse)({ success: true, data: eventResponse }));
+            description: event.description ?? undefined,
+            maxParticipants: event.maxParticipants ?? undefined,
+        });
+        res.json((0, baseResponse_1.baseResponse)({ success: true, message: `Event '${event.name}' marked as completed. ${unjoinedCount} participants unjoined. Total participants: ${totalParticipants}` }));
     }
     catch (err) {
+        console.error('Finish event error:', err);
         res.status(500).json((0, baseResponse_2.errorResponse)(err));
     }
 };
-exports.unjoinEvent = unjoinEvent;
+exports.finishEvent = finishEvent;

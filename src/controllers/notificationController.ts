@@ -1,3 +1,5 @@
+
+
 /**
  * File: notificationController.ts
  * Author: eventFlow Team
@@ -18,8 +20,55 @@ import { verifyJwt } from '../utils/jwt';
 import { JWTPayload } from '../types/jwtPayload';
 import { emitNotification } from '../utils/socket';
 import { Notification } from '../types/notification';
-import { findEventById } from '../repositories/eventRepository';
+import { findEventById, isEventOrganizer } from '../repositories/eventRepository';
+import { findActiveEventParticipant } from '../repositories/eventParticipantRepository';
 
+export const sendCustomNotification = async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    const payload = token ? (verifyJwt(token) as JWTPayload) : null;
+    if (!payload || payload.role !== 'ORGANIZER') {
+      return res.status(403).json(errorResponse('Forbidden: Only organizer can send custom notification.'));
+    }
+    const { eventId } = req.params;
+    const { participantId, title, message, type } = req.body;
+    if (!participantId || !title || !message || !type) {
+      return res.status(400).json(errorResponse('participantId, title, message, type wajib diisi'));
+    }
+    // Validasi organizer event
+    const organizerValid = await isEventOrganizer(eventId, payload.userId);
+    if (!organizerValid) {
+      return res.status(403).json(errorResponse('Forbidden: You are not the organizer of this event.'));
+    }
+    // Validasi participant aktif di event
+    const participant = await findActiveEventParticipant(participantId, eventId);
+    if (!participant) {
+      return res.status(404).json(errorResponse('Participant not found or not active in this event.'));
+    }
+    // Buat notifikasi
+    const notif = await createNotification({
+      title,
+      message,
+      type,
+      eventId,
+      userNotifications: {
+        create: [{ user: { connect: { id: participantId } } }]
+      }
+    });
+    // Emit real-time
+    emitNotification({
+      id: notif.id,
+      title,
+      message,
+      type,
+      eventId,
+      createdAt: notif.createdAt
+    });
+    res.json(baseResponse({ success: true, data: notif, message: 'Notifikasi berhasil dikirim ke participant.' }));
+  } catch (err) {
+    res.status(500).json(errorResponse(err instanceof Error ? err.message : 'Unknown error'));
+  }
+};
 
 export const createBroadcast = async (req: Request, res: Response, next: Function) => {
   try {
@@ -28,7 +77,7 @@ export const createBroadcast = async (req: Request, res: Response, next: Functio
     if (!payload)
       return res.status(401).json(errorResponse('Unauthorized'));
     const { eventId, category, message, title, type } = req.body;
-    if (!eventId || !category || !message || !title)
+    if (!eventId || !message || !title)
       return res.status(400).json(errorResponse('Missing fields'));
     // Validasi event dan hak broadcast
     const event = await findEventById(eventId);

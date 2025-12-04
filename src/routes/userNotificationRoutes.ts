@@ -20,7 +20,7 @@ const router = Router();
 
 /**
  * @swagger
- * /notifications/markAll/read:
+ * /user-notifications/read-all:
  *   post:
  *     summary: Tandai seluruh notifikasi user sebagai sudah dibaca
  *     tags: [UserNotification]
@@ -32,11 +32,11 @@ const router = Router();
  *       401:
  *         description: Unauthorized
  */
-router.post('/notifications/markAll/read', markAllNotificationsRead);
+router.post('/read-all', markAllNotificationsRead);
 
 /**
  * @swagger
- * /notifications/me:
+ * /user-notifications/me:
  *   get:
  *     summary: Ambil semua notifikasi user
  *     tags: [UserNotification]
@@ -48,11 +48,11 @@ router.post('/notifications/markAll/read', markAllNotificationsRead);
  *       401:
  *         description: Unauthorized
 */
-router.get('/notifications/me', getUserNotifications);
+router.get('/me', getUserNotifications);
 
 /**
  * @swagger
- * /notifications/{notificationId}/read:
+ * /user-notifications/{notificationId}/read:
  *   post:
  *     summary: Tandai notifikasi user sebagai sudah dibaca
  *     tags: [UserNotification]
@@ -71,12 +71,28 @@ router.get('/notifications/me', getUserNotifications);
  *       401:
  *         description: Unauthorized
  */
-router.post('/notifications/:notificationId/read', markNotificationRead);
+router.post('/:notificationId/read', markNotificationRead);
 
 
 /**
  * @swagger
- * /notifications/me/read:
+ * /user-notifications/me/read-list:
+ *   get:
+ *     summary: Ambil jumlah notifikasi user yang sudah dibaca
+ *     tags: [UserNotification]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Jumlah notifikasi belum dibaca
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/me/read-list', getListReadNotifications);
+
+/**
+ * @swagger
+ * /user-notifications/me/unread-list:
  *   get:
  *     summary: Ambil jumlah notifikasi user yang belum dibaca
  *     tags: [UserNotification]
@@ -88,27 +104,11 @@ router.post('/notifications/:notificationId/read', markNotificationRead);
  *       401:
  *         description: Unauthorized
  */
-router.get('/notifications/me/read', getListReadNotifications);
+router.get('/me/unread-list', getListUnreadNotifications);
 
 /**
  * @swagger
- * /notifications/me/unread:
- *   get:
- *     summary: Ambil jumlah notifikasi user yang belum dibaca
- *     tags: [UserNotification]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Jumlah notifikasi belum dibaca
- *       401:
- *         description: Unauthorized
- */
-router.get('/notifications/me/unread', getListUnreadNotifications);
-
-/**
- * @swagger
- * /notifications/:notificationId/delete:
+ * /user-notifications/:notificationId/delete:
  *   delete:
  *     summary: Menghapus notifikasi user spesifik
  *     tags: [UserNotification]
@@ -127,11 +127,11 @@ router.get('/notifications/me/unread', getListUnreadNotifications);
  *       401:
  *         description: Unauthorized
  */
-router.delete('/notifications/:notificationId/delete', deleteUserNotificationById);
+router.delete('/:notificationId/delete', deleteUserNotificationById);
 
 /**
  * @swagger
- * /notifications/:eventId/delete:
+ * /user-notifications/:eventId/delete:
  *   delete:
  *     summary: Menghapus notifikasi user berdasarkan event yang diikuti
  *     tags: [UserNotification]
@@ -150,11 +150,11 @@ router.delete('/notifications/:notificationId/delete', deleteUserNotificationByI
  *       401:
  *         description: Unauthorized
  */
-router.delete('/notifications/:eventId/delete', deleteAllNotificationByEvent);
+router.delete('/:eventId/delete', deleteAllNotificationByEvent);
 
 /**
  * @swagger
- * /notifications/delete:
+ * /user-notifications/delete-all:
  *   delete:
  *     summary: Menghapus seluruh notifkasi user
  *     tags: [UserNotification]
@@ -166,6 +166,6 @@ router.delete('/notifications/:eventId/delete', deleteAllNotificationByEvent);
  *       401:
  *         description: Unauthorized
  */
-router.delete('/notifications/delete', deleteAllNotificationForUser);
+router.delete('/delete-all', deleteAllNotificationForUser);
 
 export default router;

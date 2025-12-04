@@ -1,3 +1,4 @@
+
 /**
  * @file Notification Routes
  * @author eventFlow Team
@@ -10,9 +11,66 @@ import { requireRole } from '../middleware/requireRole';
 import {
   createBroadcast,
   getEventNotifications,
+  sendCustomNotification
 } from '../controllers/notificationController';
 
 const router = Router();
+
+/**
+ * @swagger
+ * /notifications/custom/{eventId}:
+ *   post:
+ *     summary: Kirim notifikasi custom dari organizer ke participant event
+ *     tags:
+ *       - Notification
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID event
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               participantId:
+ *                 type: string
+ *                 description: ID participant event
+ *               title:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [GENERAL, EVENT_UPDATE, BROADCAST, SECURITY_ALERT]
+ *     responses:
+ *       200:
+ *         description: Notifikasi berhasil dikirim ke participant
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Notification'
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Participant not found
+ */
+router.post('/custom/:eventId', requireAuth, requireRole(['ORGANIZER']),sendCustomNotification);
 
 /**
  * @swagger
@@ -29,13 +87,10 @@ const router = Router();
  *           schema:
  *             type: object
  *             required:
- *               - category
  *               - message
  *               - title
  *             properties:
  *               eventId:
- *                 type: string
- *               category:
  *                 type: string
  *               message:
  *                 type: string
@@ -58,9 +113,10 @@ router.post(
   createBroadcast,
 );
 
+
 /**
  * @swagger
- * /notifications/event/{id}:
+ * /notifications/{id}:
  *   get:
  *     summary: Ambil semua notifikasi pada suatu event tertentu
  *     tags: [Notification]
@@ -79,7 +135,7 @@ router.post(
  *       401:
  *         description: Unauthorized
  */
-router.get('/event/:id', requireAuth, getEventNotifications);
+router.get('/:id', requireAuth, getEventNotifications);
 
 
 export default router;

@@ -17,12 +17,10 @@ const createPollController = async (req, res) => {
         if (!question || !Array.isArray(options) || options.length < 2)
             return res.status(400).json((0, baseResponse_2.errorResponse)('Pertanyaan dan minimal 2 opsi diperlukan'));
         const poll = await (0, pollRepository_1.createPoll)({ eventId, question, options });
-        // Ambil poll beserta opsi dan statistik
         const pollWithStats = await (0, pollRepository_1.getPollWithVoteStats)(poll.id);
         if (!pollWithStats) {
             return res.status(404).json((0, baseResponse_2.errorResponse)('Poll tidak ditemukan setelah pembuatan'));
         }
-        // Emit real-time event for new poll menggunakan utility yang sudah ada
         (0, socket_1.emitPollCreated)(eventId, {
             pollId: pollWithStats.id,
             question: pollWithStats.question,
@@ -53,14 +51,11 @@ const submitVote = async (req, res) => {
         const { pollOptionId } = req.body;
         if (!pollOptionId)
             return res.status(400).json((0, baseResponse_2.errorResponse)('Opsi voting kosong'));
-        // Submit vote and get updated options
         const { vote, updatedOptions } = await (0, pollRepository_1.submitPollVote)({
             pollOptionId,
             userId: payload.userId,
         });
-        // Get complete poll stats for real-time update
         const pollStats = await (0, pollRepository_1.getPollWithVoteStats)(pollId);
-        // Emit real-time update to all clients in the event room menggunakan utility yang sudah ada
         (0, socket_1.emitVotingUpdate)(eventId, {
             pollId,
             options: updatedOptions,
@@ -114,11 +109,8 @@ const unPollVote = async (req, res) => {
         if (!payload)
             return res.status(401).json((0, baseResponse_2.errorResponse)('Unauthorized'));
         const { eventId, pollId } = req.params;
-        // Delete vote and get updated options
         const { deletedCount, updatedOptions } = await (0, pollRepository_1.deletePollVote)(pollId, payload.userId);
-        // Get complete poll stats for real-time update
         const pollStats = await (0, pollRepository_1.getPollWithVoteStats)(pollId);
-        // Emit real-time update menggunakan utility yang sudah ada
         (0, socket_1.emitVotingUpdate)(eventId, {
             pollId,
             options: updatedOptions,
@@ -171,7 +163,6 @@ const getEventPollsController = async (req, res) => {
         if (!eventId)
             return res.status(400).json((0, baseResponse_2.errorResponse)('eventId wajib diisi'));
         const polls = await (0, pollRepository_1.getEventPolls)(eventId);
-        // Enhance polls with user vote information
         const enhancedPolls = await Promise.all(polls.map(async (poll) => {
             const pollStats = await (0, pollRepository_1.getPollWithVoteStats)(poll.id, userId);
             return pollStats;
@@ -197,13 +188,11 @@ const deletePollController = async (req, res) => {
         const { pollId, eventId } = req.params;
         if (!pollId)
             return res.status(400).json((0, baseResponse_2.errorResponse)('pollId wajib diisi'));
-        // Hanya perlu memeriksa apakah poll ada sebelum menghapus
         const pollExists = await (0, pollRepository_1.getPollWithVoteStats)(pollId);
         if (!pollExists) {
             return res.status(404).json((0, baseResponse_2.errorResponse)('Poll tidak ditemukan'));
         }
         await (0, pollRepository_1.deletePoll)(pollId);
-        // Emit real-time event for poll deletion menggunakan utility yang sudah ada
         (0, socket_1.emitPollDeleted)(eventId, {
             pollId,
             eventId

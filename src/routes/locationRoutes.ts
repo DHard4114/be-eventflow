@@ -15,7 +15,7 @@ const router = Router();
 
 /**
  * @swagger
- * /events/{eventId}/location:
+ * /locations/{eventId}:
  *   post:
  *     summary: Update lokasi peserta pada event
  *     tags: [Location]
@@ -50,11 +50,11 @@ const router = Router();
  *       401:
  *         description: Unauthorized
  */
-router.post('/events/:eventId/location', updateLocation);
+router.post('/:eventId', updateLocation);
 
 /**
  * @swagger
- * /events/{eventId}/locations:
+ * /locations/{eventId}:
  *   get:
  *     summary: Ambil semua lokasi peserta pada event
  *     tags: [Location]
@@ -69,11 +69,11 @@ router.post('/events/:eventId/location', updateLocation);
  *       200:
  *         description: List lokasi peserta
  */
-router.get('/events/:eventId/locations', getEventLocations);
+router.get('/:eventId', getEventLocations);
 
 /**
  * @swagger
- * /events/{eventId}/location/me:
+ * /locations/{eventId}/me:
  *   get:
  *     summary: Ambil lokasi user saat ini pada event
  *     tags: [Location]
@@ -92,6 +92,6 @@ router.get('/events/:eventId/locations', getEventLocations);
  *       401:
  *         description: Unauthorized
  */
-router.get('/events/:eventId/location/me', getMyLocation);
+router.get('/:eventId/me', getMyLocation);
 
 export default router;

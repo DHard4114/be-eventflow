@@ -66,6 +66,35 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
+export const regitserAsOrganizer = async (req: Request, res: Response) => {
+  try{
+    const {name, email, password, phoneNumber} = req.body;
+    if (!name || !email || !password)
+      return res.status(400).json(errorResponse('Missing fields'));
+    const existing = await findUserByEmail(email);
+    if (existing)
+      return res.status(409).json(errorResponse('Email already registered'));
+    const passwordHash = await bcrypt.hash(password, 10);
+    const userRaw = await createUser({
+      name,
+      email,
+      passwordHash,
+      phoneNumber,
+      role: 'ORGANIZER',
+    });
+    const user: User = {
+      ...userRaw,
+      passwordHash: userRaw.passwordHash === null ? undefined : userRaw.passwordHash,
+      avatarUrl: userRaw.avatarUrl === null ? undefined : userRaw.avatarUrl,
+      phoneNumber: userRaw.phoneNumber === null ? undefined : userRaw.phoneNumber,
+      googleId: userRaw.googleId === null ? undefined : userRaw.googleId,
+    };
+    res.json(baseResponse({ success: true, data: { user } }));
+  }
+  catch (err) {
+    res.status(500).json(errorResponse(err));
+  }
+};
 export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password, phoneNumber } = req.body;
@@ -88,12 +117,14 @@ export const register = async (req: Request, res: Response) => {
       phoneNumber: userRaw.phoneNumber === null ? undefined : userRaw.phoneNumber,
       googleId: userRaw.googleId === null ? undefined : userRaw.googleId,
     };
-    const token = signJwt({ userId: user.id, role: user.role });
-    res.json(baseResponse({ success: true, data: { user, token } }));
+    // const token = signJwt({ userId: user.id, role: user.role });
+    res.json(baseResponse({ success: true, data: { user } }));
   } catch (err) {
     res.status(500).json(errorResponse(err));
   }
 };
+
+
 
 export const login = async (req: Request, res: Response) => {
   try {

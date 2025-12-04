@@ -1,3 +1,4 @@
+;
 /**
  * File: virtualAreaController.ts
  * Author: eventFlow Team
@@ -9,13 +10,15 @@
  * Dependensi: Express, Prisma, JWT
 */
 import { Request, Response } from 'express';
+import { prisma } from '../config/prisma';
 import {
   createVirtualArea as createVirtualAreaRepo,
   listVirtualAreas,
   updateVirtualArea as updateVirtualAreaRepo,
   deleteVirtualArea as deleteVirtualAreaRepo,
   searchVirtualAreaByLocation as searchVirtualAreaByLocationRepo,
-  findVirtualAreaByEventAndId
+  findVirtualAreaByEventAndId,
+  getUserCurrentVirtualArea
 } from '../repositories/virtualAreaRepository';
 import { baseResponse } from '../utils/baseResponse';
 import { errorResponse } from '../utils/baseResponse';
@@ -23,19 +26,50 @@ import { JWTPayload } from '../types/jwtPayload';
 import { verifyJwt } from '../utils/jwt';
 
 
+// Endpoint: GET /events/:eventId/virtual-area/current?lat=...&lng=...
+export const getCurrentVirtualArea = async (req: Request, res: Response) => {
+  try {
+    const { eventId } = req.params;
+    const token = req.headers.authorization?.split(' ')[1];
+    const payload = token ? (verifyJwt(token) as JWTPayload) : null;
+    if (!payload) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    const userId = payload.userId;
+    if (!eventId || !userId) {
+      return res.status(400).json({ success: false, message: 'eventId dan userId wajib diisi' });
+    }
+    // Ambil lokasi user dari ParticipantLocation
+    const { prisma } = require('../config/prisma');
+    const location = await prisma.participantLocation.findUnique({ where: { userId_eventId: { userId, eventId } } });
+    if (!location) {
+      return res.status(404).json({ success: false, message: 'Lokasi user tidak ditemukan' });
+    }
+    const area = await getUserCurrentVirtualArea(eventId, location.latitude, location.longitude);
+    return res.json({ success: true, data: area, message: area ? 'User berada di area virtual' : 'User di luar area virtual' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err instanceof Error ? err.message : 'Unknown error' });
+  }
+};
+
 export const createVirtualArea = async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     const payload = token ? (verifyJwt(token) as JWTPayload) : null;
     if (!payload)
       return res.status(401).json(errorResponse('Unauthorized'));
-    const { id: eventId } = req.params;
+    const { eventId } = req.params;
     const { name, area, color } = req.body;
     if (!name || !area || !color)
       return res.status(400).json(errorResponse('Missing fields'));
     // Pastikan area dikirim sebagai GeoJSON Polygon string
     if (!area.type || area.type !== 'Polygon' || !Array.isArray(area.coordinates)) {
       return res.status(400).json(errorResponse('Area must be valid GeoJSON Polygon'));
+    }
+    // Cek eventId valid
+    const event = await prisma.event.findUnique({ where: { id: eventId } });
+    if (!event) {
+      return res.status(400).json(errorResponse('Event tidak ditemukan'));
     }
     const created = await createVirtualAreaRepo({
       name,
@@ -60,7 +94,7 @@ export const createVirtualArea = async (req: Request, res: Response) => {
 
 export const getVirtualAreas = async (req: Request, res: Response) => {
   try {
-    const { id: eventId } = req.params;
+    const { eventId } = req.params;
     const repoAreas = await listVirtualAreas(eventId);
     // Diasumsikan repo sudah mengembalikan area sebagai string GeoJSON
     const areas = repoAreas.map(a => ({
@@ -78,7 +112,7 @@ export const getVirtualAreas = async (req: Request, res: Response) => {
 
 export const getVirtualAreaById = async (req: Request, res: Response) => {
   try {
-    const { id: eventId, areaId } = req.params;
+    const { eventId, areaId } = req.params;
     const area = await findVirtualAreaByEventAndId(eventId, areaId);
     if (!area) {
       return res.status(404).json(errorResponse('Area not found'));
@@ -98,7 +132,7 @@ export const getVirtualAreaById = async (req: Request, res: Response) => {
 
 export const searchVirtualAreaByLocation = async (req: Request, res: Response) => {
   try {
-    const { id: eventId } = req.params;
+    const { eventId } = req.params;
     const { latitude, longitude } = req.query;
     const lat = parseFloat(latitude as string);
     const lon = parseFloat(longitude as string);

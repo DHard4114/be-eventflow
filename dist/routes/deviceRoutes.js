@@ -41,7 +41,7 @@ const router = (0, express_1.Router)();
  *       401:
  *         description: Unauthorized
  */
-router.post('/devices/register', deviceController_1.registerDevice);
+router.post('/register', deviceController_1.registerDevice);
 /**
  * @swagger
  * /devices/me:
@@ -57,7 +57,7 @@ router.post('/devices/register', deviceController_1.registerDevice);
  *       401:
  *         description: Unauthorized
  */
-router.get('/devices/me', deviceController_1.getMyDevices);
+router.get('/me', deviceController_1.getMyDevices);
 /**
  * @swagger
  * /devices/{deviceId}:
@@ -80,5 +80,5 @@ router.get('/devices/me', deviceController_1.getMyDevices);
  *       401:
  *         description: Unauthorized
  */
-router.delete('/devices/:deviceId', deviceController_1.deleteDevice);
+router.delete('/:deviceId', deviceController_1.deleteDevice);
 exports.default = router;

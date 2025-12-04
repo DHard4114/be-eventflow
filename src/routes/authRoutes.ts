@@ -2,42 +2,6 @@
  * @file Auth Routes
  * @author eventFlow Team
  * @description Endpoint untuk autentikasi user (register, login, update, delete)
- * @swagger
- * tags:
- *   - name: Auth
- *     description: Endpoint autentikasi dan manajemen user
- * 
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- *       description: Masukkan JWT token yang didapat dari endpoint /auth/login
- *   schemas:
- *     User:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *         name:
- *           type: string
- *         email:
- *           type: string
- *         phoneNumber:
- *           type: string
- *         avatarUrl:
- *           type: string
- *         createdAt:
- *           type: string
- *           format: date-time
- *     ErrorResponse:
- *       type: object
- *       properties:
- *         error:
- *           type: string
- *         message:
- *           type: string
  */
 
 import { Router } from 'express';
@@ -46,6 +10,7 @@ import {
   login,
   updateUser,
   deleteUser,
+  regitserAsOrganizer
 } from '../controllers/authController';
 import { requireAuth } from '../utils/requireAuth';
 
@@ -53,7 +18,7 @@ const router = Router();
 
 /**
  * @swagger
- * /auth/register:
+ * /auths/register:
  *   post:
  *     summary: Register user baru
  *     description: Registrasi user baru ke eventFlow.
@@ -124,7 +89,78 @@ router.post('/register', register);
 
 /**
  * @swagger
- * /auth/login:
+ * /auths/register-as-organizer:
+ *   post:
+ *     summary: Register Dashboard
+ *     description: Registrasi Organizer baru ke eventFlow.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nama lengkap user
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 description: Email user
+ *                 example: john@example.com
+ *               password:
+ *                 type: string
+ *                 description: Password user (minimal 6 karakter)
+ *                 example: password123
+ *               phoneNumber:
+ *                 type: string
+ *                 description: Nomor telepon user
+ *                 example: "081234567890"
+ *     responses:
+ *       200:
+ *         description: User berhasil diregistrasi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User registered successfully
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *                 token:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       400:
+ *         description: Data tidak lengkap
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               error: Bad Request
+ *               message: All fields are required
+ *       409:
+ *         description: Email sudah terdaftar
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               error: Conflict
+ *               message: Email already registered
+ */
+router.post('/register-as-organizer', regitserAsOrganizer);
+
+/**
+ * @swagger
+ * /auths/login:
  *   post:
  *     summary: Login user
  *     description: Login user ke eventFlow dan mendapatkan JWT token.
@@ -187,7 +223,7 @@ router.post('/login', login);
 
 /**
  * @swagger
- * /auth/update:
+ * /auths/update:
  *   patch:
  *     summary: Update data user
  *     description: Update data user yang sedang login. Memerlukan JWT token.
@@ -250,7 +286,7 @@ router.patch('/update', requireAuth, updateUser);
 
 /**
  * @swagger
- * /auth/delete:
+ * /auths/delete:
  *   delete:
  *     summary: Hapus user
  *     description: Hapus user yang sedang login dari eventFlow. Memerlukan JWT token.

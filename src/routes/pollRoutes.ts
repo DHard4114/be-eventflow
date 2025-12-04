@@ -21,7 +21,7 @@ const router = Router();
 
 /**
  * @swagger
- * /polls/events/{eventId}:
+ * /polls/{eventId}:
  *   post:
  *     summary: Membuat polling baru pada event
  *     tags: [Poll]
@@ -60,11 +60,11 @@ const router = Router();
  *     security:
  *       - bearerAuth: []
  */
-router.post('/events/:eventId', createPollController);
+router.post('/:eventId', createPollController);
 
 /**
  * @swagger
- * /polls/events/{eventId}/{pollId}/vote:
+ * /polls/{pollId}/vote:
  *   post:
  *     summary: Submit vote pada polling event (real-time)
  *     tags: [Poll]
@@ -99,11 +99,11 @@ router.post('/events/:eventId', createPollController);
  *     security:
  *       - bearerAuth: []
  */
-router.post('/events/:eventId/:pollId/vote', submitVote);
+router.post('/:pollId/vote', submitVote);
 
 /**
  * @swagger
- * /polls/events/{eventId}:
+ * /polls/{eventId}:
  *   get:
  *     summary: Ambil semua polling pada event dengan statistik
  *     tags: [Poll]
@@ -120,7 +120,7 @@ router.post('/events/:eventId/:pollId/vote', submitVote);
  *       400:
  *         description: eventId wajib diisi
  */
-router.get('/events/:eventId', getEventPollsController);
+router.get('/:eventId', getEventPollsController);
 
 /**
  * @swagger
@@ -164,7 +164,7 @@ router.get('/:pollId/my-vote', getUserVote);
 
 /**
  * @swagger
- * /polls/events/{eventId}/{pollId}/unvote:
+ * /polls/{pollId}/unvote:
  *   post:
  *     summary: Un-vote (hapus vote polling event) - real-time
  *     tags: [Poll]
@@ -187,11 +187,11 @@ router.get('/:pollId/my-vote', getUserVote);
  *     security:
  *       - bearerAuth: []
  */
-router.post('/events/:eventId/:pollId/unvote', unPollVote);
+router.post('/:pollId/unvote', unPollVote);
 
 /**
  * @swagger
- * /polls/{pollId}/events/{eventId}:
+ * /polls/{pollId}:
  *   delete:
  *     summary: Hapus polling event (real-time)
  *     tags: [Poll]
@@ -218,6 +218,6 @@ router.post('/events/:eventId/:pollId/unvote', unPollVote);
  *     security:
  *       - bearerAuth: []
  */
-router.delete('/:pollId/events/:eventId', deletePollController);
+router.delete('/:pollId', deletePollController);
 
 export default router;

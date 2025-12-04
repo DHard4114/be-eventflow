@@ -32,10 +32,11 @@ export const upsertParticipantLocation = async (
   eventId: string,
   latitude: number,
   longitude: number,
+  lastGeofenceStatus?: string
 ): Promise<ParticipantLocation> => {
   return prisma.participantLocation.upsert({
     where: { userId_eventId: { userId, eventId } },
-    update: { latitude, longitude, lastUpdatedAt: new Date() },
-    create: { userId, eventId, latitude, longitude },
+    update: { latitude, longitude, lastUpdatedAt: new Date(), lastGeofenceStatus },
+    create: { userId, eventId, latitude, longitude, lastGeofenceStatus },
   });
 };

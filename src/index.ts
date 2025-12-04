@@ -17,6 +17,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import eventRoutes from './routes/eventRoutes';
+import eventParticipantRoutes from './routes/eventParticipantRoutes';
 import reportRoutes from './routes/reportRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import virtualAreaRoutes from './routes/virtualAreaRoutes';
@@ -25,6 +26,8 @@ import userNotificationRoutes from './routes/userNotificationRoutes';
 import deviceRoutes from './routes/deviceRoutes';
 import chatRoutes from './routes/chatRoutes';
 import pollRoutes from './routes/pollRoutes';
+import reportAIResultRoutes from './routes/reportAIResultRoutes';
+import importantSpotRoutes from './routes/importantSpotRoutes';
 import { setSocketInstance } from './utils/socket';
 import { env } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
@@ -69,17 +72,20 @@ app.get('/', (req: express.Request, res: express.Response) => {
   res.send('EventFlow backend is running!');
 });
 
-app.use('/reports', reportRoutes);
-app.use('/notifications', notificationRoutes);
-app.use('/auth', authRoutes);
+app.use('/auths', authRoutes);
 app.use('/users', userRoutes);
 app.use('/events', eventRoutes);
-app.use('/events', virtualAreaRoutes);
-app.use('/', locationRoutes);
-app.use('/chat', chatRoutes);
+app.use('/event-participants', eventParticipantRoutes);
+app.use('/notifications', notificationRoutes);
+app.use('/user-notifications', userNotificationRoutes);
+app.use('/reports', reportRoutes);
+app.use('/reports-ai', reportAIResultRoutes);
+app.use('/virtual-area', virtualAreaRoutes);
+app.use('/locations', locationRoutes);
+app.use('/chats', chatRoutes);
 app.use('/polls', pollRoutes);
-app.use('/', userNotificationRoutes);
-app.use('/', deviceRoutes);
+app.use('/devices', deviceRoutes);
+app.use('/important-spots', importantSpotRoutes);
 
 io.on('connection', (socket) => {
   console.log('Socket connected:', socket.id);

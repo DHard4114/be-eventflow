@@ -22,18 +22,6 @@ export const createEvent = async (data: Prisma.EventCreateInput): Promise<Event>
   return prisma.event.create({ data });
 };
 
-export const isEventParticipant = async (eventId: string, userId: string): Promise<boolean> => {
-  const participant = await prisma.eventParticipant.findUnique({
-    where: {
-      userId_eventId: {
-        userId,
-        eventId
-      }
-    }
-  });
-  return !!participant;
-};
-
 export const isEventOrganizer = async (eventId: string, userId: string): Promise<boolean> => {
   const event = await prisma.event.findUnique({
     where: { id: eventId },

@@ -13,7 +13,7 @@ const chatController_1 = require("../controllers/chatController");
 const router = (0, express_1.Router)();
 /**
  * @swagger
- * /chat/events/{eventId}:
+ * /chats/{eventId}:
  *   post:
  *     summary: Kirim pesan chat grup event
  *     tags: [Chat]
@@ -40,10 +40,10 @@ const router = (0, express_1.Router)();
  *     security:
  *       - bearerAuth: []
  */
-router.post('/events/:eventId', chatController_1.sendGroupChat);
+router.post('/:eventId', chatController_1.sendGroupChat);
 /**
  * @swagger
- * /chat/events/{eventId}/chat:
+ * /chats/{eventId}:
  *   get:
  *     summary: Ambil semua pesan chat grup event
  *     tags: [Chat]
@@ -58,10 +58,10 @@ router.post('/events/:eventId', chatController_1.sendGroupChat);
  *       200:
  *         description: List pesan chat
  */
-router.get('/events/:eventId/chat', chatController_1.getGroupChat);
+router.get('/:eventId', chatController_1.getGroupChat);
 /**
  * @swagger
- * /chat/{chatId}:
+ * /chats/{chatId}:
  *   patch:
  *     summary: Edit pesan chat (hanya pemilik pesan)
  *     tags: [Chat]
@@ -93,7 +93,7 @@ router.get('/events/:eventId/chat', chatController_1.getGroupChat);
 router.patch('/:chatId', chatController_1.updateGroupChat);
 /**
  * @swagger
- * /chat/{chatId}:
+ * /chats/{chatId}:
  *   delete:
  *     summary: Hapus pesan chat secara permanen (admin/panitia)
  *     tags: [Chat]
@@ -113,7 +113,7 @@ router.patch('/:chatId', chatController_1.updateGroupChat);
 router.delete('/:chatId', chatController_1.deleteGroupChat);
 /**
  * @swagger
- * /chat/{chatId}/me:
+ * /chats/{chatId}/me:
  *   delete:
  *     summary: Hapus pesan chat hanya untuk diri sendiri (soft delete)
  *     tags: [Chat]

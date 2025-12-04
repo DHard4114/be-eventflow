@@ -1,4 +1,3 @@
-import { ReportCategory, ReportStatus } from '@prisma/client';
 /**
  * File: reportController.ts
  * Author: eventFlow Team
@@ -11,14 +10,14 @@ import { ReportCategory, ReportStatus } from '@prisma/client';
  */
 
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ReportCategory, ReportStatus } from '@prisma/client';
 import {
   createReport as createReportRepo,
   updateReport as updateReportRepo,
   deleteReport as deleteReportRepo,
   findReportById,
-  listEventReportsForOrganizer,
-  listEventReportsForParticipant,
+  // listEventReportsForOrganizer,
+  // listEventReportsForParticipant,
   getReportStats,
   getUrgentReports,
   batchUpdateReportStatus
@@ -33,7 +32,10 @@ import {
   emitEventBroadcast 
 } from '../utils/socket';
 import { createNotification } from '../repositories/notificationRepository';
-import { isEventParticipant, isEventOrganizer } from '../repositories/eventRepository';
+import { isEventOrganizer } from '../repositories/eventRepository';
+import { isEventParticipant } from '../repositories/eventParticipantRepository';
+import { getGeminiIncidentAnalysis } from '../services/geminiService';
+import { createReportAIResult } from '../repositories/reportAIResultRepository';
 
 const prisma = new PrismaClient();
 
@@ -89,17 +91,78 @@ export const createReport = async (req: Request, res: Response) => {
         ? req.body.mediaUrls
         : [req.body.mediaUrls];
     }
-
+    const latNum = typeof latitude === 'string' ? parseFloat(latitude) : latitude;
+    const lngNum = typeof longitude === 'string' ? parseFloat(longitude) : longitude;
     // Create report
     const report = await createReportRepo({
+      event: { connect: { id: eventId } },
+      reporter: { connect: { id: payload.userId } },
       category,
       description,
-      latitude: parseFloat(latitude),
-      longitude: parseFloat(longitude),
-      reporter: { connect: { id: payload.userId } },
-      event: { connect: { id: eventId } },
-      mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
+      latitude: latNum,
+      longitude: lngNum,
+      mediaUrls,
+      status: 'PENDING'
     });
+
+    // --- AI Insight ---
+    let aiInsight: string | null = null;
+    try {
+      if (description && mediaUrls.length > 0) {
+        // Ambil data event untuk parameter Gemini
+        const event = await prisma.event.findUnique({
+          where: { id: eventId },
+          select: { name: true, description: true, locationName: true, virtualAreas: true }
+        });
+        // Validasi eventLocationName
+        const eventLocationName = event?.locationName || 'Unknown Location';
+        const eventDescription = event?.description || '';
+        const eventName = event?.name || '';
+        // Ambil virtualAreaName jika ada
+        let virtualAreaName = 'Unknown Zone';
+        if (event?.virtualAreas && Array.isArray(event.virtualAreas) && event.virtualAreas.length > 0) {
+          virtualAreaName = event.virtualAreas[0].name || 'Unknown Zone';
+        }
+        // Ambil nama reporter dan role
+        const reporterName = report.reporter?.name || 'Unknown Reporter';
+        const reporterRole = payload.role || 'participant';
+        aiInsight = await getGeminiIncidentAnalysis(
+          eventName,
+          eventDescription,
+          eventLocationName,
+          virtualAreaName,
+          reporterName,
+          reporterRole,
+          category,
+          description,
+          latitude,
+          longitude,
+          mediaUrls[0]
+        );
+        // Simpan hasil AI ke ReportAIResult
+        await createReportAIResult({
+          reportId: report.id,
+          aiType: 'gemini-multimodal',
+          aiPayload: { insight: aiInsight },
+          status: 'SUCCESS',
+          errorMsg: null,
+          meta: {
+            model: 'gemini-2.5-flash',
+            executedAt: new Date().toISOString(),
+            mediaUrl: mediaUrls[0],
+            promptVersion: 'v3.0',
+            inputCategory: category,
+            inputLatitude: latitude,
+            inputLongitude: longitude,
+            eventId,
+            reporterId: payload.userId
+          }
+        });
+      }
+    } catch (err) {
+      console.error('AI Insight error:', err);
+    }
+    // --- End AI Insight ---
 
     // REAL-TIME: Emit ke organizer event
     emitLiveReport(eventId, {
@@ -134,7 +197,7 @@ export const createReport = async (req: Request, res: Response) => {
         // Emit notification real-time
         emitNotification({
           id: notif.id,
-          title: `🚨 Laporan ${category}`,
+          title: `Laporan ${category}`,
           message: `${report.reporter.name}: ${description.substring(0, 100)}${description.length > 100 ? '...' : ''}`,
           type: category === 'SECURITY' ? 'SECURITY_ALERT' : 'EVENT_UPDATE',
           eventId: eventId,
@@ -146,20 +209,11 @@ export const createReport = async (req: Request, res: Response) => {
       console.error('Gagal membuat notifikasi:', notifError);
     }
 
-    res.status(201).json(baseResponse({ 
-      success: true, 
-      data: {
-        id: report.id,
-        category: report.category,
-        description: report.description,
-        latitude: report.latitude,
-        longitude: report.longitude,
-        status: report.status,
-        mediaUrls: Array.isArray(report.mediaUrls) ? report.mediaUrls : [],
-        reporter: report.reporter,
-        createdAt: report.createdAt
-      },
-      message: 'Laporan berhasil dibuat dan dikirim ke organizer'
+    // Kirim response ke client (bisa tambahkan aiInsight di response)
+    return res.status(201).json(baseResponse({
+      success: true,
+      data: { report, aiInsight },
+      message: 'Laporan berhasil dibuat dan dianalisis AI'
     }));
   } catch (err) {
     console.error('Create report error:', err);
@@ -180,31 +234,53 @@ export const getReports = async (req: Request, res: Response) => {
 
     const { id: eventId } = req.params;
     const { category, status, startDate, endDate } = req.query;
-
     const isOrganizer = await isEventOrganizer(eventId, payload.userId);
 
-    let categoryFilter: ReportCategory | undefined;
-    let statusFilter: ReportStatus | undefined;
-
+    let where: Record<string, unknown> = { eventId };
     if (category && Object.values(ReportCategory).includes(category as ReportCategory)) {
-      categoryFilter = category as ReportCategory;
+      where.category = category;
     }
     if (status && Object.values(ReportStatus).includes(status as ReportStatus)) {
-      statusFilter = status as ReportStatus;
+      where.status = status;
+    }
+    if (startDate && endDate) {
+      where.createdAt = {
+        gte: new Date(startDate as string),
+        lte: new Date(endDate as string)
+      };
     }
 
     let reports;
     if (isOrganizer) {
-      // Organizer dengan filters
-      reports = await listEventReportsForOrganizer(eventId, {
-        category: categoryFilter,
-        status: statusFilter,
-        startDate: startDate ? new Date(startDate as string) : undefined,
-        endDate: endDate ? new Date(endDate as string) : undefined
+      reports = await prisma.report.findMany({
+        where,
+        include: {
+          reporter: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              avatarUrl: true,
+              phoneNumber: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
       });
     } else {
-      // Participant hanya lihat miliknya
-      reports = await listEventReportsForParticipant(eventId, payload.userId);
+      reports = await prisma.report.findMany({
+        where: { ...where, reporterId: payload.userId },
+        include: {
+          reporter: {
+            select: {
+              id: true,
+              name: true,
+              avatarUrl: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
     }
 
     const formattedReports = reports.map((r) => ({
@@ -284,9 +360,10 @@ export const updateReportStatus = async (req: Request, res: Response) => {
     });
 
     // Notifikasi ke reporter
+    const notifMessage = `Laporan Anda tentang ${report.category} telah diupdate ke: ${status}${adminNotes ? ' - ' + adminNotes : ''}`;
     const notif = await createNotification({
       title: 'Status Laporan Diupdate',
-      message: `Laporan Anda tentang ${report.category} telah diupdate ke: ${status}`,
+      message: notifMessage,
       type: 'EVENT_UPDATE',
       eventId: report.eventId,
       userNotifications: {
@@ -474,7 +551,7 @@ export const getReportStatistics = async (req: Request, res: Response) => {
 };
 
 /**
- * 🚨 Get urgent reports (SECURITY yang PENDING)
+ * Get urgent reports (SECURITY yang PENDING)
  */
 export const getUrgentReportsHandler = async (req: Request, res: Response) => {
   try {

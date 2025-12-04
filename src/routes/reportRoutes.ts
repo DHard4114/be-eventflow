@@ -6,8 +6,6 @@
  */
 
 import { Router } from 'express';
-import { Request, Response, NextFunction } from 'express';
-import { MulterError } from 'multer';
 import { requireAuth } from '../utils/requireAuth';
 import {
   createReport,
@@ -19,103 +17,15 @@ import {
   getUrgentReportsHandler,
   batchUpdateStatus
 } from '../controllers/reportController';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 
-
-const uploadDir = path.join(process.cwd(), 'uploads', 'reports');
-
-// Ensure directory exists on startup
-try {
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-    console.log('Upload directory created:', uploadDir);
-  }
-} catch (error) {
-  console.error('Failed to create upload directory:', error);
-}
-
-// Enhanced multer configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/reports/');
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `report-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
-
-const upload = multer({
-  storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB per file
-    files: 5 // Max 5 files
-  },
-  fileFilter: (req, file, cb) => {
-    const allowedMimes = [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'video/mp4',
-      'video/quicktime',
-      'video/webm',
-      'audio/mpeg',
-      'audio/wav'
-    ];
-    
-    if (allowedMimes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Jenis file tidak didukung. Hanya gambar, video, dan audio yang diperbolehkan.'));
-    }
-  }
-});
+import { uploadReport } from '../utils/uploadReport';
+import { handleMulterError } from '../utils/handleMulterError';
 
 const router = Router();
 
-
-const handleMulterError = (
-  err: unknown,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if (err instanceof MulterError) {
-    if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({
-        success: false,
-        error: 'File terlalu besar. Maksimal 10MB per file.'
-      });
-    }
-    if (err.code === 'LIMIT_FILE_COUNT') {
-      return res.status(400).json({
-        success: false,
-        error: 'Terlalu banyak file. Maksimal 5 file.'
-      });
-    }
-    return res.status(400).json({
-      success: false,
-      error: `Upload error: ${err.message}`
-    });
-  }
-
-  if (err && typeof err === 'object' && err !== null && 'message' in err) {
-    console.error('Upload error:', err);
-    return res.status(400).json({
-      success: false,
-      error: (err as { message?: string }).message || 'Upload gagal'
-    });
-  }
-
-  next();
-};
-
 /**
  * @swagger
- * /reports/events/{id}:
+ * /reports/{id}:
  *   post:
  *     summary: Buat laporan baru (real-time ke organizer)
  *     description: Participant membuat laporan yang langsung dikirim ke organizer via socket
@@ -184,11 +94,11 @@ const handleMulterError = (
  *       403:
  *         description: Forbidden - Bukan participant event
  */
-router.post('/events/:id', requireAuth, upload.array('media', 5),handleMulterError,createReport);
+router.post('/:id', requireAuth, uploadReport.array('media', 5), handleMulterError, createReport);
 
 /**
  * @swagger
- * /reports/events/{id}/reports:
+ * /reports/{id}/my-reports:
  *   get:
  *     summary: Ambil daftar laporan event
  *     description: Organizer melihat semua, participant hanya miliknya
@@ -232,11 +142,11 @@ router.post('/events/:id', requireAuth, upload.array('media', 5),handleMulterErr
  *       401:
  *         description: Unauthorized
  */
-router.get('/events/:id/reports', requireAuth, getReports);
+router.get('/:id/my-reports', requireAuth, getReports);
 
 /**
  * @swagger
- * /reports/events/{id}/statistics:
+ * /reports/{id}/statistics:
  *   get:
  *     summary: Statistik laporan event (organizer only)
  *     description: Dashboard data untuk monitoring laporan
@@ -270,11 +180,11 @@ router.get('/events/:id/reports', requireAuth, getReports);
  *       403:
  *         description: Bukan organizer
  */
-router.get('/events/:id/statistics', requireAuth, getReportStatistics);
+router.get('/:id/statistics', requireAuth, getReportStatistics);
 
 /**
  * @swagger
- * /reports/events/{id}/urgent:
+ * /reports/{id}/urgent:
  *   get:
  *     summary: Laporan urgent (SECURITY PENDING)
  *     description: List laporan security yang butuh perhatian segera
@@ -294,7 +204,7 @@ router.get('/events/:id/statistics', requireAuth, getReportStatistics);
  *       403:
  *         description: Bukan organizer
  */
-router.get('/events/:id/urgent', requireAuth, getUrgentReportsHandler);
+router.get('/:id/urgent', requireAuth, getUrgentReportsHandler);
 
 /**
  * @swagger

@@ -14,8 +14,9 @@ import {
   updateEvent,
   deleteEvent,
   joinEvent,
+  finishEvent,
 } from '../controllers/eventController';
-import { unjoinEvent } from '../controllers/eventController';
+
 
 const router = Router();
 
@@ -40,7 +41,6 @@ const router = Router();
  *               - locationName
  *               - latitude
  *               - longitude
- *               - joinCode
  *             properties:
  *               name:
  *                 type: string
@@ -58,8 +58,6 @@ const router = Router();
  *                 type: number
  *               longitude:
  *                 type: number
- *               joinCode:
- *                 type: string
  *     responses:
  *       200:
  *         description: Event berhasil dibuat
@@ -200,9 +198,9 @@ router.delete('/:id', requireAuth, requireRole(['ORGANIZER']), deleteEvent);
 
 /**
  * @swagger
- * /events/{id}/unjoin:
- *   delete:
- *     summary: Keluar dari event (unjoin)
+ * /events/{id}/finish:
+ *   patch:
+ *     summary: Selesaikan event (organizer only)
  *     tags: [Event]
  *     security:
  *       - bearerAuth: []
@@ -215,9 +213,13 @@ router.delete('/:id', requireAuth, requireRole(['ORGANIZER']), deleteEvent);
  *         description: ID event
  *     responses:
  *       200:
- *         description: Berhasil keluar dari event
+ *         description: Event berhasil diselesaikan
  *       401:
  *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  */
-router.delete('/:id/unjoin', requireAuth, unjoinEvent);
+router.patch('/:id/finish', requireAuth, requireRole(['ORGANIZER']), finishEvent);
+
 export default router;
+  

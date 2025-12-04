@@ -10,7 +10,7 @@ const locationController_1 = require("../controllers/locationController");
 const router = (0, express_1.Router)();
 /**
  * @swagger
- * /events/{eventId}/location:
+ * /locations/{eventId}:
  *   post:
  *     summary: Update lokasi peserta pada event
  *     tags: [Location]
@@ -45,10 +45,10 @@ const router = (0, express_1.Router)();
  *       401:
  *         description: Unauthorized
  */
-router.post('/events/:eventId/location', locationController_1.updateLocation);
+router.post('/:eventId', locationController_1.updateLocation);
 /**
  * @swagger
- * /events/{eventId}/locations:
+ * /locations/{eventId}:
  *   get:
  *     summary: Ambil semua lokasi peserta pada event
  *     tags: [Location]
@@ -63,10 +63,10 @@ router.post('/events/:eventId/location', locationController_1.updateLocation);
  *       200:
  *         description: List lokasi peserta
  */
-router.get('/events/:eventId/locations', locationController_1.getEventLocations);
+router.get('/:eventId', locationController_1.getEventLocations);
 /**
  * @swagger
- * /events/{eventId}/location/me:
+ * /locations/{eventId}/me:
  *   get:
  *     summary: Ambil lokasi user saat ini pada event
  *     tags: [Location]
@@ -85,5 +85,5 @@ router.get('/events/:eventId/locations', locationController_1.getEventLocations)
  *       401:
  *         description: Unauthorized
  */
-router.get('/events/:eventId/location/me', locationController_1.getMyLocation);
+router.get('/:eventId/me', locationController_1.getMyLocation);
 exports.default = router;

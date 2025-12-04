@@ -13,7 +13,7 @@ const pollController_1 = require("../controllers/pollController");
 const router = (0, express_1.Router)();
 /**
  * @swagger
- * /polls/events/{eventId}:
+ * /polls/{eventId}:
  *   post:
  *     summary: Membuat polling baru pada event
  *     tags: [Poll]
@@ -52,10 +52,10 @@ const router = (0, express_1.Router)();
  *     security:
  *       - bearerAuth: []
  */
-router.post('/events/:eventId', pollController_1.createPollController);
+router.post('/:eventId', pollController_1.createPollController);
 /**
  * @swagger
- * /polls/events/{eventId}/{pollId}/vote:
+ * /polls/{pollId}/vote:
  *   post:
  *     summary: Submit vote pada polling event (real-time)
  *     tags: [Poll]
@@ -90,10 +90,10 @@ router.post('/events/:eventId', pollController_1.createPollController);
  *     security:
  *       - bearerAuth: []
  */
-router.post('/events/:eventId/:pollId/vote', pollController_1.submitVote);
+router.post('/:pollId/vote', pollController_1.submitVote);
 /**
  * @swagger
- * /polls/events/{eventId}:
+ * /polls/{eventId}:
  *   get:
  *     summary: Ambil semua polling pada event dengan statistik
  *     tags: [Poll]
@@ -110,7 +110,7 @@ router.post('/events/:eventId/:pollId/vote', pollController_1.submitVote);
  *       400:
  *         description: eventId wajib diisi
  */
-router.get('/events/:eventId', pollController_1.getEventPollsController);
+router.get('/:eventId', pollController_1.getEventPollsController);
 /**
  * @swagger
  * /polls/{pollId}/results:
@@ -151,7 +151,7 @@ router.get('/:pollId/results', pollController_1.getPollResults);
 router.get('/:pollId/my-vote', pollController_1.getUserVote);
 /**
  * @swagger
- * /polls/events/{eventId}/{pollId}/unvote:
+ * /polls/{pollId}/unvote:
  *   post:
  *     summary: Un-vote (hapus vote polling event) - real-time
  *     tags: [Poll]
@@ -174,10 +174,10 @@ router.get('/:pollId/my-vote', pollController_1.getUserVote);
  *     security:
  *       - bearerAuth: []
  */
-router.post('/events/:eventId/:pollId/unvote', pollController_1.unPollVote);
+router.post('/:pollId/unvote', pollController_1.unPollVote);
 /**
  * @swagger
- * /polls/{pollId}/events/{eventId}:
+ * /polls/{pollId}:
  *   delete:
  *     summary: Hapus polling event (real-time)
  *     tags: [Poll]
@@ -204,5 +204,5 @@ router.post('/events/:eventId/:pollId/unvote', pollController_1.unPollVote);
  *     security:
  *       - bearerAuth: []
  */
-router.delete('/:pollId/events/:eventId', pollController_1.deletePollController);
+router.delete('/:pollId', pollController_1.deletePollController);
 exports.default = router;

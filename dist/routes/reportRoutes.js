@@ -5,96 +5,16 @@
  * @description Complete API endpoints untuk sistem laporan event
  * @version 3.0.0
  */
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const multer_1 = require("multer");
 const requireAuth_1 = require("../utils/requireAuth");
 const reportController_1 = require("../controllers/reportController");
-const multer_2 = __importDefault(require("multer"));
-const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
-const uploadDir = path_1.default.join(process.cwd(), 'uploads', 'reports');
-// Ensure directory exists on startup
-try {
-    if (!fs_1.default.existsSync(uploadDir)) {
-        fs_1.default.mkdirSync(uploadDir, { recursive: true });
-        console.log('✅ Upload directory created:', uploadDir);
-    }
-}
-catch (error) {
-    console.error('❌ Failed to create upload directory:', error);
-}
-// Enhanced multer configuration
-const storage = multer_2.default.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/reports/');
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, `report-${uniqueSuffix}${path_1.default.extname(file.originalname)}`);
-    }
-});
-const upload = (0, multer_2.default)({
-    storage,
-    limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB per file
-        files: 5 // Max 5 files
-    },
-    fileFilter: (req, file, cb) => {
-        const allowedMimes = [
-            'image/jpeg',
-            'image/png',
-            'image/gif',
-            'image/webp',
-            'video/mp4',
-            'video/quicktime',
-            'video/webm',
-            'audio/mpeg',
-            'audio/wav'
-        ];
-        if (allowedMimes.includes(file.mimetype)) {
-            cb(null, true);
-        }
-        else {
-            cb(new Error('Jenis file tidak didukung. Hanya gambar, video, dan audio yang diperbolehkan.'));
-        }
-    }
-});
+const uploadReport_1 = require("../utils/uploadReport");
+const handleMulterError_1 = require("../utils/handleMulterError");
 const router = (0, express_1.Router)();
-const handleMulterError = (err, req, res, next) => {
-    if (err instanceof multer_1.MulterError) {
-        if (err.code === 'LIMIT_FILE_SIZE') {
-            return res.status(400).json({
-                success: false,
-                error: 'File terlalu besar. Maksimal 10MB per file.'
-            });
-        }
-        if (err.code === 'LIMIT_FILE_COUNT') {
-            return res.status(400).json({
-                success: false,
-                error: 'Terlalu banyak file. Maksimal 5 file.'
-            });
-        }
-        return res.status(400).json({
-            success: false,
-            error: `Upload error: ${err.message}`
-        });
-    }
-    if (err && typeof err === 'object' && err !== null && 'message' in err) {
-        console.error('Upload error:', err);
-        return res.status(400).json({
-            success: false,
-            error: err.message || 'Upload gagal'
-        });
-    }
-    next();
-};
 /**
  * @swagger
- * /reports/events/{id}:
+ * /reports/{id}:
  *   post:
  *     summary: Buat laporan baru (real-time ke organizer)
  *     description: Participant membuat laporan yang langsung dikirim ke organizer via socket
@@ -163,10 +83,10 @@ const handleMulterError = (err, req, res, next) => {
  *       403:
  *         description: Forbidden - Bukan participant event
  */
-router.post('/events/:id', requireAuth_1.requireAuth, upload.array('media', 5), handleMulterError, reportController_1.createReport);
+router.post('/:id', requireAuth_1.requireAuth, uploadReport_1.uploadReport.array('media', 5), handleMulterError_1.handleMulterError, reportController_1.createReport);
 /**
  * @swagger
- * /reports/events/{id}/reports:
+ * /reports/{id}/my-reports:
  *   get:
  *     summary: Ambil daftar laporan event
  *     description: Organizer melihat semua, participant hanya miliknya
@@ -210,10 +130,10 @@ router.post('/events/:id', requireAuth_1.requireAuth, upload.array('media', 5), 
  *       401:
  *         description: Unauthorized
  */
-router.get('/events/:id/reports', requireAuth_1.requireAuth, reportController_1.getReports);
+router.get('/:id/my-reports', requireAuth_1.requireAuth, reportController_1.getReports);
 /**
  * @swagger
- * /reports/events/{id}/statistics:
+ * /reports/{id}/statistics:
  *   get:
  *     summary: Statistik laporan event (organizer only)
  *     description: Dashboard data untuk monitoring laporan
@@ -247,10 +167,10 @@ router.get('/events/:id/reports', requireAuth_1.requireAuth, reportController_1.
  *       403:
  *         description: Bukan organizer
  */
-router.get('/events/:id/statistics', requireAuth_1.requireAuth, reportController_1.getReportStatistics);
+router.get('/:id/statistics', requireAuth_1.requireAuth, reportController_1.getReportStatistics);
 /**
  * @swagger
- * /reports/events/{id}/urgent:
+ * /reports/{id}/urgent:
  *   get:
  *     summary: Laporan urgent (SECURITY PENDING)
  *     description: List laporan security yang butuh perhatian segera
@@ -270,7 +190,7 @@ router.get('/events/:id/statistics', requireAuth_1.requireAuth, reportController
  *       403:
  *         description: Bukan organizer
  */
-router.get('/events/:id/urgent', requireAuth_1.requireAuth, reportController_1.getUrgentReportsHandler);
+router.get('/:id/urgent', requireAuth_1.requireAuth, reportController_1.getUrgentReportsHandler);
 /**
  * @swagger
  * /reports/{reportId}/status:
@@ -314,7 +234,7 @@ router.patch('/:reportId/status', requireAuth_1.requireAuth, reportController_1.
  * @swagger
  * /reports/{reportId}/broadcast:
  *   post:
- *     summary: 🔥 Broadcast laporan ke semua participants
+ *     summary: Broadcast laporan ke semua participants
  *     description: Kirim notifikasi real-time laporan penting ke semua peserta
  *     tags: [Report]
  *     security:
@@ -368,7 +288,7 @@ router.post('/:reportId/broadcast', requireAuth_1.requireAuth, reportController_
  * @swagger
  * /reports/batch-update:
  *   patch:
- *     summary: 🔄 Update status multiple reports sekaligus
+ *     summary: Update status multiple reports sekaligus
  *     description: Batch operation untuk efisiensi organizer
  *     tags: [Report]
  *     security:

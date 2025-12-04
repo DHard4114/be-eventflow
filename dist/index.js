@@ -21,6 +21,7 @@ const socket_io_1 = require("socket.io");
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const eventRoutes_1 = __importDefault(require("./routes/eventRoutes"));
+const eventParticipantRoutes_1 = __importDefault(require("./routes/eventParticipantRoutes"));
 const reportRoutes_1 = __importDefault(require("./routes/reportRoutes"));
 const notificationRoutes_1 = __importDefault(require("./routes/notificationRoutes"));
 const virtualAreaRoutes_1 = __importDefault(require("./routes/virtualAreaRoutes"));
@@ -29,6 +30,8 @@ const userNotificationRoutes_1 = __importDefault(require("./routes/userNotificat
 const deviceRoutes_1 = __importDefault(require("./routes/deviceRoutes"));
 const chatRoutes_1 = __importDefault(require("./routes/chatRoutes"));
 const pollRoutes_1 = __importDefault(require("./routes/pollRoutes"));
+const reportAIResultRoutes_1 = __importDefault(require("./routes/reportAIResultRoutes"));
+const importantSpotRoutes_1 = __importDefault(require("./routes/importantSpotRoutes"));
 const socket_1 = require("./utils/socket");
 const env_1 = require("./config/env");
 const errorHandler_1 = require("./middleware/errorHandler");
@@ -42,7 +45,7 @@ app.use((req, res, next) => {
     next();
 });
 app.use((0, cors_1.default)({
-    origin: 'http://127.0.0.1:5500', // atau '*' untuk semua origin saat testing
+    origin: '*',
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     allowedHeaders: ['Authorization', 'Content-Type']
 }));
@@ -62,17 +65,20 @@ app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.de
 app.get('/', (req, res) => {
     res.send('EventFlow backend is running!');
 });
-app.use('/reports', reportRoutes_1.default);
-app.use('/notifications', notificationRoutes_1.default);
-app.use('/auth', authRoutes_1.default);
+app.use('/auths', authRoutes_1.default);
 app.use('/users', userRoutes_1.default);
 app.use('/events', eventRoutes_1.default);
-app.use('/events', virtualAreaRoutes_1.default);
-app.use('/', locationRoutes_1.default);
-app.use('/chat', chatRoutes_1.default);
+app.use('/event-participants', eventParticipantRoutes_1.default);
+app.use('/notifications', notificationRoutes_1.default);
+app.use('/user-notifications', userNotificationRoutes_1.default);
+app.use('/reports', reportRoutes_1.default);
+app.use('/reports-ai', reportAIResultRoutes_1.default);
+app.use('/virtual-area', virtualAreaRoutes_1.default);
+app.use('/locations', locationRoutes_1.default);
+app.use('/chats', chatRoutes_1.default);
 app.use('/polls', pollRoutes_1.default);
-app.use('/', userNotificationRoutes_1.default);
-app.use('/', deviceRoutes_1.default);
+app.use('/devices', deviceRoutes_1.default);
+app.use('/important-spots', importantSpotRoutes_1.default);
 io.on('connection', (socket) => {
     console.log('Socket connected:', socket.id);
     // Client mengirim event 'joinEventRoom' dengan eventId

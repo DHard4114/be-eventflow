@@ -1,3 +1,4 @@
+
 /**
  * File: virtualAreaRepository.ts
  * Author: eventFlow Team
@@ -12,8 +13,27 @@
 */
 import { prisma } from '../config/prisma';
 import { RawVirtualArea } from '../types/virtualArea';
+import { isLocationInsideGeofence } from '../utils/geo';
 import cuid from 'cuid';
 
+
+// Cek area virtual tempat user berada berdasarkan lokasi
+export const getUserCurrentVirtualArea = async (eventId: string, latitude: number, longitude: number) => {
+  // Ambil semua area event sebagai GeoJSON
+  const areas = await prisma.$queryRawUnsafe<RawVirtualArea[]>(
+    'SELECT id, name, ST_AsGeoJSON(area) as area, color, "eventId" FROM "VirtualArea" WHERE "eventId" = $1',
+    eventId
+  );
+  for (const area of areas) {
+    if (area.area) {
+      const geo = JSON.parse(area.area);
+      if (isLocationInsideGeofence({ latitude, longitude }, geo.coordinates)) {
+        return { id: area.id, name: area.name };
+      }
+    }
+  }
+  return null;
+};
 
 export const findVirtualAreaById = async (id: string): Promise<RawVirtualArea | null> => {
   const result = await prisma.$queryRawUnsafe<RawVirtualArea[]>(

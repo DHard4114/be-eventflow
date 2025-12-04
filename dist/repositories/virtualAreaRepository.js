@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteVirtualArea = exports.updateVirtualArea = exports.createVirtualArea = exports.listVirtualAreas = exports.findVirtualAreaByEventAndId = exports.searchVirtualAreaByLocation = exports.findVirtualAreaById = void 0;
+exports.deleteVirtualArea = exports.updateVirtualArea = exports.createVirtualArea = exports.listVirtualAreas = exports.findVirtualAreaByEventAndId = exports.searchVirtualAreaByLocation = exports.findVirtualAreaById = exports.getUserCurrentVirtualArea = void 0;
 /**
  * File: virtualAreaRepository.ts
  * Author: eventFlow Team
@@ -17,7 +17,23 @@ exports.deleteVirtualArea = exports.updateVirtualArea = exports.createVirtualAre
  * FIX: Tambahkan double quotes untuk column names yang case-sensitive (eventId)
 */
 const prisma_1 = require("../config/prisma");
+const geo_1 = require("../utils/geo");
 const cuid_1 = __importDefault(require("cuid"));
+// Cek area virtual tempat user berada berdasarkan lokasi
+const getUserCurrentVirtualArea = async (eventId, latitude, longitude) => {
+    // Ambil semua area event sebagai GeoJSON
+    const areas = await prisma_1.prisma.$queryRawUnsafe('SELECT id, name, ST_AsGeoJSON(area) as area, color, "eventId" FROM "VirtualArea" WHERE "eventId" = $1', eventId);
+    for (const area of areas) {
+        if (area.area) {
+            const geo = JSON.parse(area.area);
+            if ((0, geo_1.isLocationInsideGeofence)({ latitude, longitude }, geo.coordinates)) {
+                return { id: area.id, name: area.name };
+            }
+        }
+    }
+    return null;
+};
+exports.getUserCurrentVirtualArea = getUserCurrentVirtualArea;
 const findVirtualAreaById = async (id) => {
     const result = await prisma_1.prisma.$queryRawUnsafe('SELECT id, name, ST_AsGeoJSON(area) as area, color, "eventId" FROM "VirtualArea" WHERE id = $1 LIMIT 1', id);
     return result[0] || null;
