@@ -45,8 +45,12 @@ app.use((req, res, next) => {
   next();
 });
 
+const allowedOrigins = [
+  env.SOCKET_IO_ORIGIN,
+  env.FRONTEND_ORIGIN
+].filter(Boolean);
 app.use(cors({
-  origin: '*',
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Authorization', 'Content-Type']
 }));
