@@ -21,7 +21,7 @@
   "prisma": "prisma",
   
     
-  "postinstall": "chmod +x node_modules/.bin/tsc"
+  "postinstall": "prisma generate"
   
   },
   
