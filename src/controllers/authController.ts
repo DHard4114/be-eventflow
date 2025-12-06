@@ -35,10 +35,16 @@ export const updateUser = async (req: Request, res: Response) => {
       avatarUrl?: string;
       passwordHash?: string;
     }
-    let data: UpdateUserData = { name, phoneNumber, avatarUrl };
+    
+    // Build update data object - only include fields that are provided
+    const data: UpdateUserData = {};
+    if (name !== undefined) data.name = name;
+    if (phoneNumber !== undefined) data.phoneNumber = phoneNumber;
+    if (avatarUrl !== undefined) data.avatarUrl = avatarUrl;
     if (password) {
       data.passwordHash = await bcrypt.hash(password, 10);
     }
+    
     const userRaw = await updateUserRepo(payload.userId, data);
     const user: User = {
       ...userRaw,

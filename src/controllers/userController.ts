@@ -65,11 +65,18 @@ export const updateProfile = async (req: Request, res: Response) => {
       }
     }
 
-    const userRaw = await updateUserRepo(payload.userId, {
-      name,
-      phoneNumber,
-      avatarUrl,
-    });
+    // Build update data object - only include fields that are provided
+    const updateData: {
+      name?: string;
+      phoneNumber?: string;
+      avatarUrl?: string;
+    } = {};
+    
+    if (name !== undefined) updateData.name = name;
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+    if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
+
+    const userRaw = await updateUserRepo(payload.userId, updateData);
     const user: User = {
       ...userRaw,
       passwordHash: userRaw.passwordHash === null ? undefined : userRaw.passwordHash,

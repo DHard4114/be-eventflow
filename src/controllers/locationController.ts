@@ -17,6 +17,7 @@ import {
 import { listVirtualAreas } from '../repositories/virtualAreaRepository';
 import { updateAttendanceStatus } from '../repositories/eventParticipantRepository';
 import { findEventById } from '../repositories/eventRepository';
+import { findUserById } from '../repositories/userRepository';
 import { isLocationInsideGeofence } from '../utils/geo';
 import { emitLocationUpdate, emitGeofenceEvent } from '../utils/socket';
 import { baseResponse } from '../utils/baseResponse';
@@ -105,15 +106,25 @@ export const updateLocation = async (req: Request, res: Response) => {
       status // <-- simpan status baru
     );
 
-    // Map ParticipantLocation to EventParticipant for socket emit
-    const locationPayload = {
+    // Get user info for socket payload
+    
+    const user = await findUserById(payload.userId);
+
+    // Emit location update dengan data lengkap
+    emitLocationUpdate(eventId, {
       userId: payload.userId,
       eventId,
-      joinedAt: new Date(),
-      nodeColor: undefined,
-      attendanceStatus: undefined,
-    };
-    emitLocationUpdate(eventId, locationPayload);
+      latitude,
+      longitude,
+      geofenceStatus: status,
+      updatedAt: new Date(),
+      user: user ? {
+        id: user.id,
+        name: user.name,
+        avatarUrl: user.avatarUrl || undefined
+      } : undefined
+    });
+
     res.json(baseResponse({ success: true, data: { location, geofenceStatus: status } }));
   } catch (err) {
     res.status(500).json(errorResponse(err));

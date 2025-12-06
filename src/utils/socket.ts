@@ -22,6 +22,20 @@ export interface GeofencePayload {
   timestamp: Date;
 }
 
+export interface LocationUpdatePayload {
+  userId: string;
+  eventId: string;
+  latitude: number;
+  longitude: number;
+  geofenceStatus: 'INSIDE' | 'OUTSIDE';
+  updatedAt: Date;
+  user?: {
+    id: string;
+    name: string;
+    avatarUrl?: string;
+  };
+}
+
 export interface PollOption {
   id: string;
   text: string;
@@ -87,9 +101,9 @@ export const emitNotification = (payload: EventFullNotification | Notification) 
 /**
  * Emit update lokasi peserta ke semua client di event tertentu
  * @param eventId ID event
- * @param locationPayload Data lokasi peserta
+ * @param locationPayload Data lokasi peserta dengan koordinat dan status
  */
-export const emitLocationUpdate = (eventId: string, locationPayload: EventParticipant) => {
+export const emitLocationUpdate = (eventId: string, locationPayload: LocationUpdatePayload) => {
   if (!io) return;
   io.to(eventId).emit('locationUpdate', locationPayload);
 };
@@ -221,4 +235,4 @@ export const SOCKET_EVENTS = {
   LIVE_REPORT: 'liveReport',
   EVENT_BROADCAST: 'eventBroadcast',
   NOTIFICATION: 'notification',
-};
+} as const;
