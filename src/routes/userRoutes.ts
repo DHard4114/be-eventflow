@@ -38,7 +38,7 @@ router.get('/me', getProfile);
  *   patch:
  *     summary: Update profil user (partial update - semua field optional)
  *     description: |
- *       Bisa update foto saja, name saja, phoneNumber saja, atau kombinasi. 
+ *       Bisa update foto saja, name saja, phoneNumber saja, atau kombinasi.
  *       Field yang tidak dikirim tidak akan berubah.
  *       **Cara pakai di Swagger:**
  *       - Centang checkbox field yang mau diupdate
