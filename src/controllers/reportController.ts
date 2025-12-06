@@ -108,12 +108,26 @@ export const createReport = async (req: Request, res: Response) => {
     // --- AI Insight ---
     let aiInsight: string | null = null;
     try {
-      if (description && mediaUrls.length > 0) {
+      if (description) { // AI runs even without image
         // Ambil data event untuk parameter Gemini
         const event = await prisma.event.findUnique({
           where: { id: eventId },
           select: { name: true, description: true, locationName: true, virtualAreas: true }
         });
+        
+        // Fetch ImportantSpots untuk rekomendasi
+        const importantSpots = await prisma.importantSpot.findMany({
+          where: { eventId },
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            customType: true,
+            latitude: true,
+            longitude: true
+          }
+        });
+        
         // Validasi eventLocationName
         const eventLocationName = event?.locationName || 'Unknown Location';
         const eventDescription = event?.description || '';
@@ -137,25 +151,27 @@ export const createReport = async (req: Request, res: Response) => {
           description,
           latitude,
           longitude,
-          mediaUrls[0]
+          mediaUrls[0] || null, // Can be null if no image
+          importantSpots
         );
         // Simpan hasil AI ke ReportAIResult
         await createReportAIResult({
           reportId: report.id,
-          aiType: 'gemini-multimodal',
+          aiType: mediaUrls[0] ? 'gemini-multimodal' : 'gemini-text',
           aiPayload: { insight: aiInsight },
           status: 'SUCCESS',
           errorMsg: null,
           meta: {
             model: 'gemini-2.5-flash',
             executedAt: new Date().toISOString(),
-            mediaUrl: mediaUrls[0],
-            promptVersion: 'v3.0',
+            mediaUrl: mediaUrls[0] || null,
+            promptVersion: 'v4.0',
             inputCategory: category,
             inputLatitude: latitude,
             inputLongitude: longitude,
             eventId,
-            reporterId: payload.userId
+            reporterId: payload.userId,
+            availableSpotsCount: importantSpots.length
           }
         });
       }
