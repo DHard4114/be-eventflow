@@ -48,7 +48,12 @@ const router = Router();
  *                 type: string
  *               type:
  *                 type: string
- *                 enum: [GENERAL, EVENT_UPDATE, BROADCAST, SECURITY_ALERT]
+ *                 enum: [GENERAL, EVENT_UPDATE, SECURITY_ALERT]
+ *                 description: Label/kategori notifikasi (badge)
+ *               deliveryMethod:
+ *                 type: string
+ *                 enum: [INDIVIDUAL, BROADCAST]
+ *                 description: Metode pengiriman notifikasi
  *     responses:
  *       200:
  *         description: Notifikasi berhasil dikirim ke participant
@@ -98,6 +103,8 @@ router.post('/custom/:eventId', requireAuth, requireRole(['ORGANIZER']),sendCust
  *                 type: string
  *               type:
  *                 type: string
+ *                 enum: [GENERAL, EVENT_UPDATE, SECURITY_ALERT]
+ *                 description: Label/kategori notifikasi (badge)
  *     responses:
  *       200:
  *         description: Notifikasi berhasil dibroadcast

@@ -82,27 +82,7 @@ router.get('/event/:eventId', importantSpotController.getSpotsByEvent);
 /**
  * @swagger
  * /important-spots/{id}:
- *   get:
- *     summary: Ambil detail spot penting
- *     tags: [ImportantSpot]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Detail spot
- *       404:
- *         description: Spot tidak ditemukan
- */
-router.get('/:id', importantSpotController.getSpotById);
-
-/**
- * @swagger
- * /important-spots/update/{id}:
- *   put:
+ *   patch:
  *     summary: Update spot penting
  *     tags: [ImportantSpot]
  *     security:
@@ -137,7 +117,30 @@ router.get('/:id', importantSpotController.getSpotById);
  *       404:
  *         description: Spot tidak ditemukan
  */
-router.put('/update/:id', requireRole(['ORGANIZER']), importantSpotController.updateSpot);
+// CRITICAL: Route spesifik /update/:id HARUS SEBELUM route general /:id
+router.patch('/:id', requireRole(['ORGANIZER']), importantSpotController.updateSpot);
+
+/**
+ * @swagger
+ * /important-spots/{id}:
+ *   get:
+ *     summary: Ambil detail spot penting
+ *     tags: [ImportantSpot]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Detail spot
+ *       404:
+ *         description: Spot tidak ditemukan
+ */
+// Route general /:id HARUS SETELAH semua route spesifik
+router.get('/:id', importantSpotController.getSpotById);
+
 
 /**
  * @swagger

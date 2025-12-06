@@ -92,6 +92,7 @@ app.use('/polls', pollRoutes);
 app.use('/devices', deviceRoutes);
 app.use('/important-spots', importantSpotRoutes);
 
+
 io.on('connection', (socket) => {
   console.log('Socket connected:', socket.id);
   // Client mengirim event 'joinEventRoom' dengan eventId

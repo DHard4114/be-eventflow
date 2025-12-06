@@ -19,14 +19,15 @@ export const listNotifications = async (eventId: string): Promise<Notification[]
 };
 
 export const createNotification = async (
-  data: Omit<Prisma.NotificationCreateInput, 'event'> & { eventId: string }
+  data: Omit<Prisma.NotificationCreateInput, 'event' | 'deliveryMethod'> & { eventId: string, deliveryMethod: 'INDIVIDUAL' | 'BROADCAST' }
 ): Promise<Notification> => {
   if (!data.eventId) throw new Error('eventId wajib diisi!');
-  const { eventId, ...rest } = data;
+  const { eventId, deliveryMethod, ...rest } = data;
   return prisma.notification.create({
     data: {
       ...rest,
       type: rest.type as NotificationType,
+      deliveryMethod,
       event: { connect: { id: eventId } },
     },
   });

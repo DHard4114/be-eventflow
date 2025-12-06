@@ -14,11 +14,15 @@ import {
   unjoinEventParticipant,
   deleteEventParticipant,
   countEventParticipants,
-  listEventParticipantHistory
+  listEventParticipantHistory,
+  getAttendanceStats,
+  updateAttendanceStatus,
+  markPendingAsAbsent
 } from '../repositories/eventParticipantRepository';
 
 
 import { updateEvent } from '../repositories/eventRepository';
+import { prisma } from '../config/prisma';
 import { baseResponse, errorResponse } from '../utils/baseResponse';
 
 // Get active participant by userId & eventId
@@ -111,6 +115,139 @@ export const countParticipants = async (req: Request, res: Response) => {
     const count = await countEventParticipants(eventId);
     res.json(baseResponse({ success: true, data: { count } }));
   } catch (err) {
+    res.status(500).json(errorResponse(err));
+  }
+};
+
+// Get attendance statistics untuk organizer
+export const getAttendanceStatistics = async (req: Request, res: Response) => {
+  try {
+    const { eventId } = req.params;
+    if (!eventId) {
+      return res.status(400).json(errorResponse('eventId wajib diisi'));
+    }
+    
+    const stats = await getAttendanceStats(eventId);
+    res.json(baseResponse({ 
+      success: true, 
+      data: stats,
+      message: 'Attendance statistics retrieved successfully'
+    }));
+  } catch (err) {
+    console.error('Get attendance stats error:', err);
+    res.status(500).json(errorResponse(err));
+  }
+};
+
+// Manual update attendance status (untuk organizer override)
+export const updateParticipantAttendance = async (req: Request, res: Response) => {
+  try {
+    const { eventId, userId } = req.params;
+    const { attendanceStatus } = req.body;
+    
+    if (!['PENDING', 'PRESENT', 'ABSENT'].includes(attendanceStatus)) {
+      return res.status(400).json(errorResponse('Invalid attendance status'));
+    }
+    
+    const participant = await updateAttendanceStatus(
+      userId, 
+      eventId, 
+      attendanceStatus,
+      attendanceStatus === 'PRESENT' ? new Date() : undefined
+    );
+    
+    if (!participant) {
+      return res.status(404).json(errorResponse('Participant not found'));
+    }
+    
+    res.json(baseResponse({ 
+      success: true, 
+      data: participant,
+      message: 'Attendance status updated successfully'
+    }));
+  } catch (err) {
+    console.error('Update attendance error:', err);
+    res.status(500).json(errorResponse(err));
+  }
+};
+
+// Process ended events - mark PENDING as ABSENT
+export const processEndedEvents = async (req: Request, res: Response) => {
+  try {
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    
+    // Cari event yang baru selesai (endTime sudah lewat) atau yang di-cancel
+    const recentlyEndedEvents = await prisma.event.findMany({
+      where: {
+        OR: [
+          {
+            // Event yang baru selesai
+            endTime: {
+              gte: oneHourAgo,
+              lte: now,
+            },
+            status: {
+              in: ['ONGOING', 'UPCOMING'],
+            },
+          },
+          {
+            // Event yang baru di-cancel
+            status: 'CANCELLED',
+            updatedAt: {
+              gte: oneHourAgo,
+              lte: now,
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+      },
+    });
+    
+    if (recentlyEndedEvents.length === 0) {
+      return res.json(baseResponse({ 
+        success: true, 
+        data: { 
+          message: 'No recently ended or cancelled events found',
+          processedEvents: []
+        }
+      }));
+    }
+    
+    const processedEvents = [];
+    
+    for (const event of recentlyEndedEvents) {
+      const markedCount = await markPendingAsAbsent(event.id);
+      
+      // Update status event jika belum COMPLETED/CANCELLED
+      if (event.status !== 'CANCELLED') {
+        await prisma.event.update({
+          where: { id: event.id },
+          data: { status: 'COMPLETED' },
+        });
+      }
+      
+      processedEvents.push({
+        eventId: event.id,
+        eventName: event.name,
+        markedAbsent: markedCount,
+        eventStatus: event.status === 'CANCELLED' ? 'CANCELLED' : 'COMPLETED',
+      });
+    }
+    
+    res.json(baseResponse({ 
+      success: true, 
+      data: { 
+        message: `Processed ${processedEvents.length} event(s)`,
+        processedEvents
+      }
+    }));
+  } catch (err) {
+    console.error('[Process Ended Events] Error:', err);
     res.status(500).json(errorResponse(err));
   }
 };

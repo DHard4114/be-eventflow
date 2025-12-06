@@ -110,3 +110,77 @@ export const deleteEventParticipant = async (
 export const countEventParticipants = async (eventId: string): Promise<number> => {
   return prisma.eventParticipant.count({ where: { eventId, isActive: true } });
 };
+
+// Update attendance status participant (untuk auto check-in)
+export const updateAttendanceStatus = async (
+  userId: string,
+  eventId: string,
+  status: 'PENDING' | 'PRESENT' | 'ABSENT',
+  checkInTime?: Date
+): Promise<EventParticipant | null> => {
+  const existing = await prisma.eventParticipant.findUnique({
+    where: { userId_eventId: { userId, eventId } },
+  });
+  if (!existing) return null;
+
+  return prisma.eventParticipant.update({
+    where: { userId_eventId: { userId, eventId } },
+    data: {
+      attendanceStatus: status,
+      ...(checkInTime && { checkInTime }),
+    },
+  });
+};
+
+// Get attendance statistics untuk event
+export const getAttendanceStats = async (eventId: string) => {
+  const participants = await prisma.eventParticipant.findMany({
+    where: { eventId, isActive: true },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatarUrl: true,
+        },
+      },
+    },
+    orderBy: { joinedAt: 'asc' },
+  });
+
+  const total = participants.length;
+  const present = participants.filter(p => p.attendanceStatus === 'PRESENT').length;
+  const absent = participants.filter(p => p.attendanceStatus === 'ABSENT').length;
+  const pending = participants.filter(p => p.attendanceStatus === 'PENDING').length;
+
+  return {
+    totalParticipants: total,
+    present,
+    absent,
+    pending,
+    attendanceRate: total > 0 ? ((present / total) * 100).toFixed(2) : '0.00',
+    participants: participants.map(p => ({
+      id: p.id,
+      user: p.user,
+      attendanceStatus: p.attendanceStatus,
+      checkInTime: p.checkInTime,
+      joinedAt: p.joinedAt,
+    })),
+  };
+};
+
+// Mark semua pending participants jadi absent (untuk cronjob)
+export const markPendingAsAbsent = async (eventId: string): Promise<number> => {
+  const result = await prisma.eventParticipant.updateMany({
+    where: {
+      eventId,
+      attendanceStatus: 'PENDING',
+      isActive: true,
+    },
+    data: {
+      attendanceStatus: 'ABSENT',
+    },
+  });
+  return result.count;
+};

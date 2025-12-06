@@ -214,7 +214,7 @@ router.get('/:eventId/search', searchVirtualAreaByLocation);
 
 /**
  * @swagger
- * /events/virtual-areas/{areaId}:
+ * /virtual-area/update/{areaId}:
  *   patch:
  *     summary: Update area virtual event
  *     tags: [VirtualArea]
@@ -239,7 +239,7 @@ router.get('/:eventId/search', searchVirtualAreaByLocation);
  *       401:
  *         description: Unauthorized
  */
-router.patch('/virtual-areas/:areaId', requireAuth, updateVirtualArea);
+router.patch('/update/:areaId', requireAuth, updateVirtualArea);
 
 /**
  * @swagger

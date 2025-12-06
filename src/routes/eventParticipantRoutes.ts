@@ -13,7 +13,10 @@ import {
   unjoinParticipant,
   removeParticipant,
   countParticipants,
-  getEventParticipantHistory
+  getEventParticipantHistory,
+  getAttendanceStatistics,
+  updateParticipantAttendance,
+  processEndedEvents
 } from '../controllers/eventParticipantController';
 import { requireAuth } from '../utils/requireAuth';
 
@@ -206,5 +209,142 @@ router.patch('/:eventId/:userId/unjoin', requireAuth, unjoinParticipant);
  *         description: Peserta dihapus
  */
 router.delete('/:id/delete', requireAuth, removeParticipant);
+
+/**
+ * @swagger
+ * /event-participants/{eventId}/attendance-stats:
+ *   get:
+ *     summary: Get attendance statistics untuk event
+ *     tags:
+ *       - EventParticipant
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID event
+ *     responses:
+ *       200:
+ *         description: Attendance statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalParticipants:
+ *                       type: number
+ *                     present:
+ *                       type: number
+ *                     absent:
+ *                       type: number
+ *                     pending:
+ *                       type: number
+ *                     attendanceRate:
+ *                       type: string
+ *                     participants:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Server error
+ */
+router.get('/:eventId/attendance-stats', requireAuth, getAttendanceStatistics);
+
+/**
+ * @swagger
+ * /event-participants/{eventId}/{userId}/attendance:
+ *   patch:
+ *     summary: Update attendance status (manual override by organizer)
+ *     tags:
+ *       - EventParticipant
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID event
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               attendanceStatus:
+ *                 type: string
+ *                 enum: [PENDING, PRESENT, ABSENT]
+ *             required:
+ *               - attendanceStatus
+ *     responses:
+ *       200:
+ *         description: Attendance status updated
+ *       400:
+ *         description: Invalid status
+ *       404:
+ *         description: Participant not found
+ *       500:
+ *         description: Server error
+ */
+router.patch('/:eventId/:userId/attendance', requireAuth, updateParticipantAttendance);
+
+/**
+ * @swagger
+ * /event-participants/process-ended-events:
+ *   post:
+ *     summary: Process ended events and mark PENDING as ABSENT
+ *     description: Trigger untuk mark attendance setelah event selesai. Bisa dipanggil dari external cron service atau manual.
+ *     tags:
+ *       - EventParticipant
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Events processed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                     processedEvents:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           eventId:
+ *                             type: string
+ *                           eventName:
+ *                             type: string
+ *                           markedAbsent:
+ *                             type: number
+ *       500:
+ *         description: Server error
+ */
+router.post('/process-ended-events', requireAuth, processEndedEvents);
 
 export default router;

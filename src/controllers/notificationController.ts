@@ -51,6 +51,7 @@ export const sendCustomNotification = async (req: Request, res: Response) => {
       message,
       type,
       eventId,
+      deliveryMethod: 'INDIVIDUAL',
       userNotifications: {
         create: [{ user: { connect: { id: participantId } } }]
       }
@@ -86,8 +87,8 @@ export const createBroadcast = async (req: Request, res: Response, next: Functio
     if (event.organizerId !== payload.userId)
       return res.status(403).json(errorResponse('Anda bukan organizer event ini'));
     // Validasi type agar hanya enum NotificationType
-    const allowedTypes = ['GENERAL', 'EVENT_UPDATE', 'BROADCAST', 'SECURITY_ALERT'];
-    const notifType = allowedTypes.includes(type) ? type : 'BROADCAST';
+    const allowedTypes = ['GENERAL', 'EVENT_UPDATE', 'SECURITY_ALERT', 'REPORT_FEEDBACK'];
+    const notifType = allowedTypes.includes(type) ? type : 'GENERAL';
     // 1. Buat notifikasi event
     const prismaNotification = await createNotification({
       eventId,
@@ -95,6 +96,7 @@ export const createBroadcast = async (req: Request, res: Response, next: Functio
       message,
       title,
       type: notifType,
+      deliveryMethod: 'BROADCAST',
     });
     // 2. Ambil semua peserta event
     const participants = await prisma.eventParticipant.findMany({ where: { eventId } });

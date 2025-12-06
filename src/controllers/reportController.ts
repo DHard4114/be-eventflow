@@ -184,9 +184,10 @@ export const createReport = async (req: Request, res: Response) => {
         const notif = await createNotification({
           title: `Laporan ${category}`,
           message: `${report.reporter.name}: ${description.substring(0, 100)}${description.length > 100 ? '...' : ''}`,
-          type: category === 'SECURITY' ? 'SECURITY_ALERT' : 'EVENT_UPDATE',
+          type: 'REPORT_FEEDBACK',
           eventId: eventId,
           category: category,
+          deliveryMethod: 'INDIVIDUAL',
           userNotifications: {
             create: [{
               user: { connect: { id: event.organizerId } }
@@ -199,7 +200,7 @@ export const createReport = async (req: Request, res: Response) => {
           id: notif.id,
           title: `Laporan ${category}`,
           message: `${report.reporter.name}: ${description.substring(0, 100)}${description.length > 100 ? '...' : ''}`,
-          type: category === 'SECURITY' ? 'SECURITY_ALERT' : 'EVENT_UPDATE',
+          type: 'REPORT_FEEDBACK',
           eventId: eventId,
           category: category,
           createdAt: notif.createdAt
@@ -366,6 +367,7 @@ export const updateReportStatus = async (req: Request, res: Response) => {
       message: notifMessage,
       type: 'EVENT_UPDATE',
       eventId: report.eventId,
+      deliveryMethod: 'INDIVIDUAL',
       userNotifications: {
         create: [{
           user: { connect: { id: report.reporterId } }
@@ -436,9 +438,10 @@ export const broadcastReport = async (req: Request, res: Response) => {
     const notification = await createNotification({
       title,
       message,
-      type: 'BROADCAST',
+      type: report.category === 'SECURITY' ? 'SECURITY_ALERT' : 'EVENT_UPDATE',
       eventId: report.eventId,
       category: report.category,
+      deliveryMethod: 'BROADCAST',
       userNotifications: {
         create: participants.map((p) => ({
           user: { connect: { id: p.userId } }

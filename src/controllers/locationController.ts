@@ -15,6 +15,8 @@ import {
   findParticipantLocation,
 } from '../repositories/participantLocationRepository';
 import { listVirtualAreas } from '../repositories/virtualAreaRepository';
+import { updateAttendanceStatus } from '../repositories/eventParticipantRepository';
+import { findEventById } from '../repositories/eventRepository';
 import { isLocationInsideGeofence } from '../utils/geo';
 import { emitLocationUpdate, emitGeofenceEvent } from '../utils/socket';
 import { baseResponse } from '../utils/baseResponse';
@@ -52,7 +54,26 @@ export const updateLocation = async (req: Request, res: Response) => {
     const prevLocation = await findParticipantLocation(payload.userId, eventId);
     const prevStatus = prevLocation?.lastGeofenceStatus;
 
-    // 4. Jika keluar zona, trigger alert
+    // 4. Auto Check-in Logic: Jika masuk zona saat event berlangsung
+    if ((prevStatus === 'OUTSIDE' && status === 'INSIDE') || (!prevStatus && status === 'INSIDE')) {
+      const event = await findEventById(eventId);
+      if (event) {
+        const now = new Date();
+        const isEventOngoing = now >= event.startTime && now <= event.endTime && event.status === 'ONGOING';
+        
+        if (isEventOngoing) {
+          // Auto check-in: update attendance status ke PRESENT
+          await updateAttendanceStatus(
+            payload.userId,
+            eventId,
+            'PRESENT',
+            now
+          );
+        }
+      }
+    }
+
+    // 5. Jika keluar zona, trigger alert
     if (prevStatus === 'INSIDE' && status === 'OUTSIDE') {
       emitGeofenceEvent(eventId, {
         userId: payload.userId,
@@ -62,7 +83,7 @@ export const updateLocation = async (req: Request, res: Response) => {
       // TODO: Buat notifikasi SECURITY_ALERT ke organizer di sini jika ada sistem notifikasi
     }
 
-    // 5. Simpan lokasi dan status baru
+    // 6. Simpan lokasi dan status baru
     const location = await upsertParticipantLocation(
       payload.userId,
       eventId,
