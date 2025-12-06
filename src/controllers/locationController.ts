@@ -55,20 +55,33 @@ export const updateLocation = async (req: Request, res: Response) => {
     const prevStatus = prevLocation?.lastGeofenceStatus;
 
     // 4. Auto Check-in Logic: Jika masuk zona saat event berlangsung
-    if ((prevStatus === 'OUTSIDE' && status === 'INSIDE') || (!prevStatus && status === 'INSIDE')) {
+    // Trigger: saat transisi masuk zona ATAU sudah di dalam zona tapi masih PENDING
+    const shouldCheckIn = 
+      (prevStatus === 'OUTSIDE' && status === 'INSIDE') || // Baru masuk
+      (!prevStatus && status === 'INSIDE') ||               // Pertama kali
+      (status === 'INSIDE');                                // Sudah di dalam (fallback)
+    
+    if (shouldCheckIn) {
       const event = await findEventById(eventId);
       if (event) {
         const now = new Date();
         const isEventOngoing = now >= event.startTime && now <= event.endTime && event.status === 'ONGOING';
         
         if (isEventOngoing) {
-          // Auto check-in: update attendance status ke PRESENT
-          await updateAttendanceStatus(
-            payload.userId,
-            eventId,
-            'PRESENT',
-            now
-          );
+          // Cek apakah masih PENDING (belum check-in)
+          const { findActiveEventParticipant } = await import('../repositories/eventParticipantRepository');
+          const participant = await findActiveEventParticipant(payload.userId, eventId);
+          
+          if (participant && participant.attendanceStatus === 'PENDING') {
+            // Auto check-in: update attendance status ke PRESENT
+            await updateAttendanceStatus(
+              payload.userId,
+              eventId,
+              'PRESENT',
+              now
+            );
+            console.log(`[Auto Check-in] User ${payload.userId} marked PRESENT in event ${eventId}`);
+          }
         }
       }
     }

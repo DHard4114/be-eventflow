@@ -59,16 +59,17 @@ model Event {
 }
 
 model EventParticipant {
-  id               String   @id @default(cuid())
-  joinedAt         DateTime @default(now())
+  id               String           @id @default(cuid())
+  joinedAt         DateTime         @default(now())
   userId           String
   eventId          String
   nodeColor        String?
-  attendanceStatus String?
-  isActive         Boolean  @default(true)
+  attendanceStatus AttendanceStatus @default(PENDING)
+  checkInTime      DateTime?
+  isActive         Boolean          @default(true)
   leftAt           DateTime?
-  event            Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event            Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, eventId])
 }
@@ -172,7 +173,8 @@ model Notification {
   id                String             @id @default(cuid())
   title             String
   message           String
-  type              NotificationType   @default(GENERAL)
+  type              NotificationType   @default(GENERAL) // badge/label
+  deliveryMethod    DeliveryMethod     @default(INDIVIDUAL) // metode pengiriman
   eventId           String?
   category          ReportCategory?
   createdAt         DateTime           @default(now())
@@ -275,6 +277,17 @@ enum ReportStatus {
 enum NotificationType {
   GENERAL
   EVENT_UPDATE
-  BROADCAST
   SECURITY_ALERT
+  REPORT_FEEDBACK
+}
+
+enum DeliveryMethod {
+  INDIVIDUAL
+  BROADCAST
+}
+
+enum AttendanceStatus {
+  PENDING
+  PRESENT
+  ABSENT
 }

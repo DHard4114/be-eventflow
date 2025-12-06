@@ -365,7 +365,7 @@ export const updateReportStatus = async (req: Request, res: Response) => {
     const notif = await createNotification({
       title: 'Status Laporan Diupdate',
       message: notifMessage,
-      type: 'EVENT_UPDATE',
+      type: 'REPORT_FEEDBACK',
       eventId: report.eventId,
       deliveryMethod: 'INDIVIDUAL',
       userNotifications: {
