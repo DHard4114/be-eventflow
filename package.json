@@ -21,7 +21,7 @@
   "prisma": "prisma",
   
     
-  "postinstall": "prisma generate"
+  "postinstall": "chmod +x node_modules/.bin/prisma && prisma generate"
   
   },
   
