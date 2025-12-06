@@ -8,18 +8,22 @@
  * Lisensi: MIT
  * Dependensi: Express
  */
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 // Middleware error handler
 export function errorHandler(
-  err: unknown,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  err: any,
   req: Request,
   res: Response,
-  // next: Function
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _next: NextFunction
 ) {
   console.error(err); // Log error to console
-  const status = typeof err === 'object' && err && 'status' in err ? (err as { status?: number }).status || 500 : 500;
-  const message = typeof err === 'object' && err && 'message' in err ? (err as { message?: string }).message || 'Internal Server Error' : 'Internal Server Error';
+  
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
+  
   res.status(status).json({
     success: false,
     error: message,
