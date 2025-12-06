@@ -14,8 +14,32 @@ export const findNotificationById = async (id: string): Promise<Notification | n
   return prisma.notification.findUnique({ where: { id } });
 };
 
-export const listNotifications = async (eventId: string): Promise<Notification[]> => {
-  return prisma.notification.findMany({ where: { eventId } });
+export const listNotifications = async (eventId: string) => {
+  return prisma.notification.findMany({ 
+    where: { eventId },
+    include: {
+      userNotifications: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              avatarUrl: true
+            }
+          }
+        }
+      },
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatarUrl: true
+        }
+      }
+    }
+  });
 };
 
 export const createNotification = async (

@@ -40,7 +40,7 @@ export const getEventParticipant = async (req: Request, res: Response) => {
 export const listParticipants = async (req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
-    const participants = await listEventParticipants(eventId);
+    const participants = await listEventParticipants(eventId, true); // Exclude organizer
     res.json(baseResponse({ success: true, data: participants }));
   } catch (err) {
     res.status(500).json(errorResponse(err));

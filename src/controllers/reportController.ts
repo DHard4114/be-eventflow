@@ -186,8 +186,9 @@ export const createReport = async (req: Request, res: Response) => {
           message: `${report.reporter.name}: ${description.substring(0, 100)}${description.length > 100 ? '...' : ''}`,
           type: 'REPORT_FEEDBACK',
           eventId: eventId,
-          category: category,
+          category: category, // Category khusus untuk report
           deliveryMethod: 'INDIVIDUAL',
+          createdBy: { connect: { id: payload.userId } }, // Reporter is the creator
           userNotifications: {
             create: [{
               user: { connect: { id: event.organizerId } }
@@ -202,7 +203,7 @@ export const createReport = async (req: Request, res: Response) => {
           message: `${report.reporter.name}: ${description.substring(0, 100)}${description.length > 100 ? '...' : ''}`,
           type: 'REPORT_FEEDBACK',
           eventId: eventId,
-          category: category,
+          category: category, // Category khusus untuk report
           createdAt: notif.createdAt
         });
       }
@@ -367,7 +368,9 @@ export const updateReportStatus = async (req: Request, res: Response) => {
       message: notifMessage,
       type: 'REPORT_FEEDBACK',
       eventId: report.eventId,
+      category: report.category, // Category dari report
       deliveryMethod: 'INDIVIDUAL',
+      createdBy: { connect: { id: payload.userId } }, // Organizer is the creator
       userNotifications: {
         create: [{
           user: { connect: { id: report.reporterId } }
@@ -381,6 +384,7 @@ export const updateReportStatus = async (req: Request, res: Response) => {
       message: notif.message,
       type: notif.type,
       eventId: report.eventId,
+      category: report.category, // Category dari report
       createdAt: notif.createdAt
     });
 
@@ -425,9 +429,20 @@ export const broadcastReport = async (req: Request, res: Response) => {
       );
     }
 
-    // Get all participants
+    // Get event to find organizer ID
+    const event = await prisma.event.findUnique({
+      where: { id: report.eventId }
+    });
+    if (!event) {
+      return res.status(404).json(errorResponse('Event tidak ditemukan'));
+    }
+
+    // Get all participants (exclude organizer)
     const participants = await prisma.eventParticipant.findMany({
-      where: { eventId: report.eventId },
+      where: { 
+        eventId: report.eventId,
+        userId: { not: event.organizerId }
+      },
       include: { user: true }
     });
 
@@ -442,6 +457,7 @@ export const broadcastReport = async (req: Request, res: Response) => {
       eventId: report.eventId,
       category: report.category,
       deliveryMethod: 'BROADCAST',
+      createdBy: { connect: { id: payload.userId } }, // Organizer is the creator
       userNotifications: {
         create: participants.map((p) => ({
           user: { connect: { id: p.userId } }
@@ -454,7 +470,7 @@ export const broadcastReport = async (req: Request, res: Response) => {
       id: notification.id,
       title,
       message,
-      type: 'BROADCAST',
+      type: notification.type, // SECURITY_ALERT atau EVENT_UPDATE
       eventId: report.eventId,
       category: report.category,
       createdAt: notification.createdAt

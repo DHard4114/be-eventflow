@@ -29,6 +29,7 @@ model User {
   pollVotes           PollVote[]
   reports             Report[]
   notifications       UserNotification[]
+  createdNotifications Notification[]       @relation("NotificationCreator")
 }
 
 model Event {
@@ -176,9 +177,11 @@ model Notification {
   type              NotificationType   @default(GENERAL) // badge/label
   deliveryMethod    DeliveryMethod     @default(INDIVIDUAL) // metode pengiriman
   eventId           String?
+  createdById       String?            // Who created this notification (usually organizer)
   category          ReportCategory?
   createdAt         DateTime           @default(now())
   event             Event?             @relation(fields: [eventId], references: [id])
+  createdBy         User?              @relation(name: "NotificationCreator", fields: [createdById], references: [id])
   pollVotes         PollVote[]
   userNotifications UserNotification[]
 }

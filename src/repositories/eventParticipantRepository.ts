@@ -31,10 +31,30 @@ export const findActiveEventParticipant = async (
 // List peserta aktif pada event
 export const listEventParticipants = async (
   eventId: string,
+  excludeOrganizer: boolean = false
 ): Promise<EventParticipant[]> => {
+  if (excludeOrganizer) {
+    // Get event to find organizer ID
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: { organizerId: true }
+    });
+    if (!event) return [];
+    
+    return prisma.eventParticipant.findMany({
+      where: { 
+        eventId, 
+        isActive: true,
+        userId: { not: event.organizerId }
+      },
+      include: { user: true } 
+    });
+  }
+  
   return prisma.eventParticipant.findMany({
     where: { eventId, isActive: true },
-    include: { user: true } });
+    include: { user: true } 
+  });
 };
 
 // List history partisipasi user pada event (termasuk yang sudah unjoin)
@@ -134,8 +154,28 @@ export const updateAttendanceStatus = async (
 
 // Get attendance statistics untuk event
 export const getAttendanceStats = async (eventId: string) => {
+  // Get event to find organizer ID
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    select: { organizerId: true }
+  });
+  if (!event) {
+    return {
+      totalParticipants: 0,
+      present: 0,
+      absent: 0,
+      pending: 0,
+      attendanceRate: '0.00',
+      participants: [],
+    };
+  }
+
   const participants = await prisma.eventParticipant.findMany({
-    where: { eventId, isActive: true },
+    where: { 
+      eventId, 
+      isActive: true,
+      userId: { not: event.organizerId } // Exclude organizer
+    },
     include: {
       user: {
         select: {

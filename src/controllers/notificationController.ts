@@ -52,6 +52,7 @@ export const sendCustomNotification = async (req: Request, res: Response) => {
       type,
       eventId,
       deliveryMethod: 'INDIVIDUAL',
+      createdBy: { connect: { id: payload.userId } },
       userNotifications: {
         create: [{ user: { connect: { id: participantId } } }]
       }
@@ -97,9 +98,15 @@ export const createBroadcast = async (req: Request, res: Response, next: Functio
       title,
       type: notifType,
       deliveryMethod: 'BROADCAST',
+      createdBy: { connect: { id: payload.userId } },
     });
-    // 2. Ambil semua peserta event
-    const participants = await prisma.eventParticipant.findMany({ where: { eventId } });
+    // 2. Ambil semua peserta event (exclude organizer)
+    const participants = await prisma.eventParticipant.findMany({ 
+      where: { 
+        eventId,
+        userId: { not: event.organizerId }
+      } 
+    });
     // 3. Assign notifikasi ke semua peserta
     await Promise.all(participants.map(async (p) => {
       await createUserNotification({
@@ -123,8 +130,34 @@ export const getEventNotifications = async (req: Request, res: Response, next: F
   try {
     const { id: eventId } = req.params;
     if (!eventId) return res.status(400).json(errorResponse('eventId wajib diisi'));
+    
+    // Get event to find organizer
+    const event = await findEventById(eventId);
+    if (!event) return res.status(404).json(errorResponse('Event not found'));
+    
     const notifications = await listNotifications(eventId);
-    res.json(baseResponse({ success: true, data: notifications }));
+    
+    // Transform response to include receiver field and exclude organizer
+    const transformedNotifications = notifications.map((notif) => {
+      const { userNotifications, createdBy, ...rest } = notif;
+      
+      // Filter out organizer from receivers
+      const receivers = userNotifications
+        .map((un) => un.user)
+        .filter((user) => user.id !== event.organizerId);
+      
+      return {
+        ...rest,
+        // Return single receiver object for INDIVIDUAL, not array
+        receiver: notif.deliveryMethod === 'INDIVIDUAL' && receivers.length > 0 
+          ? receivers[0]  // Take first receiver as object
+          : undefined,
+        createdBy: createdBy || undefined, // Include creator info
+        userNotifications // Keep this for fallback in frontend
+      };
+    });
+    
+    res.json(baseResponse({ success: true, data: transformedNotifications }));
   } catch (err) {
     next(err);
   }

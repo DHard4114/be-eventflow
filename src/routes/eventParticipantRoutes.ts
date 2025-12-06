@@ -90,6 +90,56 @@ router.get('/:eventId/get-list', requireAuth, listParticipants);
 
 /**
  * @swagger
+ * /event-participants/{eventId}/attendance-stats:
+ *   get:
+ *     summary: Get attendance statistics untuk event
+ *     tags:
+ *       - EventParticipant
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID event
+ *     responses:
+ *       200:
+ *         description: Attendance statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalParticipants:
+ *                       type: number
+ *                     present:
+ *                       type: number
+ *                     absent:
+ *                       type: number
+ *                     pending:
+ *                       type: number
+ *                     attendanceRate:
+ *                       type: string
+ *                     participants:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Server error
+ */
+router.get('/:eventId/attendance-stats', requireAuth, getAttendanceStatistics);
+
+/**
+ * @swagger
  * /event-participants/{eventId}/count:
  *   get:
  *     summary: Hitung peserta aktif event
@@ -210,55 +260,7 @@ router.patch('/:eventId/:userId/unjoin', requireAuth, unjoinParticipant);
  */
 router.delete('/:id/delete', requireAuth, removeParticipant);
 
-/**
- * @swagger
- * /event-participants/{eventId}/attendance-stats:
- *   get:
- *     summary: Get attendance statistics untuk event
- *     tags:
- *       - EventParticipant
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: eventId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID event
- *     responses:
- *       200:
- *         description: Attendance statistics
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
- *                   properties:
- *                     totalParticipants:
- *                       type: number
- *                     present:
- *                       type: number
- *                     absent:
- *                       type: number
- *                     pending:
- *                       type: number
- *                     attendanceRate:
- *                       type: string
- *                     participants:
- *                       type: array
- *                       items:
- *                         type: object
- *       400:
- *         description: Bad request
- *       500:
- *         description: Server error
- */
-router.get('/:eventId/attendance-stats', requireAuth, getAttendanceStatistics);
+
 
 /**
  * @swagger
