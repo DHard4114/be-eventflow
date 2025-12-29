@@ -1,8 +1,14 @@
 
 /**
- * Repository untuk akses data ImportantSpot (titik penting event)
- * Fitur: CRUD spot penting, filter by event, update, delete
- * Model: ImportantSpot, SpotType
+ * @file importantSpotRepository.ts
+ * @module repositories/importantSpotRepository
+ * @author eventFlow Team
+ * @description Repository for accessing ImportantSpot data (event important points). Features: CRUD important spots, filter by event, update, delete.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Prisma, ../config/prisma
  */
 import { prisma, ImportantSpot, SpotType } from '../config/prisma';
 

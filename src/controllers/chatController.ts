@@ -1,12 +1,14 @@
+
 /**
- * File: chatController.ts
- * Author: eventFlow Team
- * Deskripsi: Mengelola endpoint chat event (group chat, DM, chat ke panitia) dan emit pesan real-time via Socket.io.
- * Dibuat: 2025-11-11
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, Prisma, JWT, Socket.io
-*/
+ * @file chatController.ts
+ * @module controllers/chatController
+ * @author eventFlow Team
+ * @description Handles event chat endpoints (group chat, DM, committee chat) and emits real-time messages via Socket.io.
+ * @created 2025-11-11
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Prisma, JWT, Socket.io
+ */
 import { Request, Response } from 'express';
 import { baseResponse } from '../utils/baseResponse';
 import { errorResponse } from '../utils/baseResponse';

@@ -1,11 +1,13 @@
+
 /**
- * @file Device Routes
+ * @file deviceRoutes.ts
+ * @module routes/deviceRoutes
  * @author eventFlow Team
- * @description Endpoint untuk manajemen device (push token, user device)
- * @swagger
- * tags:
- *   - name: Device
- *     description: Endpoint manajemen device user dan push token
+ * @description Endpoints for device management (push token, user device).
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/deviceController
  */
 
 import { Router } from 'express';

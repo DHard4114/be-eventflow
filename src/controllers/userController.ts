@@ -1,12 +1,13 @@
 /**
- * File: userController.ts
- * Author: eventFlow Team
- * Deskripsi: Mengelola seluruh endpoint API terkait user, termasuk profil, update data, dan hapus akun. Mendukung upload avatar ke Cloudinary.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, Prisma, JWT, Cloudinary
+ * @file userController.ts
+ * @module controllers/userController
+ * @author eventFlow Team
+ * @description Handles all user-related API endpoints, including profile, data update, and account deletion. Supports avatar upload to Cloudinary.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Prisma, JWT, Cloudinary
  */
 import { Request, Response } from 'express';
 
@@ -31,7 +32,6 @@ export const getProfile = async (req: Request, res: Response) => {
     const userRaw = await findUserById(payload.userId);
     if (!userRaw)
       return res.status(404).json(errorResponse('User not found'));
-    // Map passwordHash and avatarUrl: null -> undefined for type compatibility
     const user: User = {
       ...userRaw,
       passwordHash: userRaw.passwordHash === null ? undefined : userRaw.passwordHash,
@@ -54,24 +54,20 @@ export const updateProfile = async (req: Request, res: Response) => {
     const { name, phoneNumber } = req.body;
 
     let avatarUrl = req.body.avatarUrl;
-    // Jika ada file avatar yang diupload (via multer)
     if (req.file) {
       try {
         avatarUrl = await uploadToCloudinary(req.file.path);
       } catch (err) {
-        console.error('Cloudinary upload error:', err);
         res.status(500).json(errorResponse(err));
         return;
       }
     }
 
-    // Build update data object - only include fields that are provided
     const updateData: {
       name?: string;
       phoneNumber?: string;
       avatarUrl?: string;
     } = {};
-    
     if (name !== undefined) updateData.name = name;
     if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
     if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
@@ -86,7 +82,6 @@ export const updateProfile = async (req: Request, res: Response) => {
     };
     res.json(baseResponse({ success: true, data: user }));
   } catch (err) {
-    console.error('Update profile error:', err);
     res.status(500).json(errorResponse(err));
   }
 };

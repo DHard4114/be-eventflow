@@ -1,10 +1,12 @@
 /**
- * File: eventParticipantController.ts
- * Author: eventFlow Team
- * Deskripsi: Controller khusus untuk operasi CRUD dan query EventParticipant
- * Dibuat: 2025-11-22
- * Versi: 1.0.0
- * Lisensi: MIT
+ * @file eventParticipantController.ts
+ * @module controllers/eventParticipantController
+ * @author eventFlow Team
+ * @description Controller for CRUD operations and queries related to EventParticipant.
+ * @created 2025-11-22
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Prisma, ../repositories/eventParticipantRepository, ../repositories/eventRepository, ../config/prisma, ../utils/baseResponse
  */
 import { Request, Response } from 'express';
 import {
@@ -25,7 +27,7 @@ import { updateEvent } from '../repositories/eventRepository';
 import { prisma } from '../config/prisma';
 import { baseResponse, errorResponse } from '../utils/baseResponse';
 
-// Get active participant by userId & eventId
+// Retrieve active participant by userId and eventId
 export const getEventParticipant = async (req: Request, res: Response) => {
   try {
     const { userId, eventId } = req.params;
@@ -40,7 +42,7 @@ export const getEventParticipant = async (req: Request, res: Response) => {
 export const listParticipants = async (req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
-    const participants = await listEventParticipants(eventId, true); // Exclude organizer
+    const participants = await listEventParticipants(eventId, true); // Exclude organizer from the list
     res.json(baseResponse({ success: true, data: participants }));
   } catch (err) {
     res.status(500).json(errorResponse(err));
@@ -48,7 +50,7 @@ export const listParticipants = async (req: Request, res: Response) => {
 };
 
 /**
- * Get history partisipasi user pada event
+ * Retrieve the participation history of a user in an event.
  */
 export const getEventParticipantHistory = async (req: Request, res: Response) => {
   try {
@@ -59,10 +61,10 @@ export const getEventParticipantHistory = async (req: Request, res: Response) =>
     }
     const { eventId, userId } = req.params;
     if (!eventId || !userId) {
-      return res.status(400).json({ success: false, message: 'eventId dan userId wajib diisi' });
+      return res.status(400).json({ success: false, message: 'eventId and userId are required' });
     }
     const history = await listEventParticipantHistory(userId, eventId);
-    return res.json({ success: true, data: history, message: 'History partisipasi user pada event' });
+    return res.json({ success: true, data: history, message: 'User participation history for the event' });
   } catch (err) {
     console.error('Get participant history error:', err);
     res.status(500).json({ success: false, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -73,7 +75,7 @@ export const addParticipant = async (req: Request, res: Response) => {
   try {
     const { userId, eventId } = req.body;
     if (!userId || !eventId) {
-      return res.status(400).json(errorResponse('userId dan eventId wajib diisi'));
+      return res.status(400).json(errorResponse('userId and eventId are required'));
     }
     const participant = await joinOrReactivateEventParticipant(userId, eventId);
     res.json(baseResponse({ success: true, data: participant }));
@@ -82,14 +84,13 @@ export const addParticipant = async (req: Request, res: Response) => {
   }
 };
 
-// Unjoin participant (set isActive = false)
+// Unjoin participant (set isActive to false)
 export const unjoinParticipant = async (req: Request, res: Response) => {
   try {
     const { userId, eventId } = req.params;
     const participant = await unjoinEventParticipant(userId, eventId);
     if (!participant) return res.status(404).json(errorResponse('Active participant not found'));
-    // Update totalParticipants di Event setelah unjoin
-   
+    // Update totalParticipants in Event after unjoining
     const totalParticipants = await countEventParticipants(eventId);
     await updateEvent(eventId, { totalParticipants });
     res.json(baseResponse({ success: true, data: { participant, totalParticipants } }));
@@ -98,7 +99,7 @@ export const unjoinParticipant = async (req: Request, res: Response) => {
   }
 };
 
-// Hapus record by id
+// Delete participant record by id
 export const removeParticipant = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -119,12 +120,12 @@ export const countParticipants = async (req: Request, res: Response) => {
   }
 };
 
-// Get attendance statistics untuk organizer
+// Retrieve attendance statistics for organizer
 export const getAttendanceStatistics = async (req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
     if (!eventId) {
-      return res.status(400).json(errorResponse('eventId wajib diisi'));
+      return res.status(400).json(errorResponse('eventId is required'));
     }
     
     const stats = await getAttendanceStats(eventId);
@@ -139,7 +140,7 @@ export const getAttendanceStatistics = async (req: Request, res: Response) => {
   }
 };
 
-// Manual update attendance status (untuk organizer override)
+// Manually update attendance status (organizer override)
 export const updateParticipantAttendance = async (req: Request, res: Response) => {
   try {
     const { eventId, userId } = req.params;
@@ -171,18 +172,18 @@ export const updateParticipantAttendance = async (req: Request, res: Response) =
   }
 };
 
-// Process ended events - mark PENDING as ABSENT
+// Process ended events - mark all PENDING participants as ABSENT
 export const processEndedEvents = async (req: Request, res: Response) => {
   try {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
     
-    // Cari event yang baru selesai (endTime sudah lewat) atau yang di-cancel
+    // Find events that have just ended (endTime has passed) or have been cancelled
     const recentlyEndedEvents = await prisma.event.findMany({
       where: {
         OR: [
           {
-            // Event yang baru selesai
+            // Events that have just ended
             endTime: {
               gte: oneHourAgo,
               lte: now,
@@ -192,7 +193,7 @@ export const processEndedEvents = async (req: Request, res: Response) => {
             },
           },
           {
-            // Event yang baru di-cancel
+            // Events that have just been cancelled
             status: 'CANCELLED',
             updatedAt: {
               gte: oneHourAgo,
@@ -223,7 +224,7 @@ export const processEndedEvents = async (req: Request, res: Response) => {
     for (const event of recentlyEndedEvents) {
       const markedCount = await markPendingAsAbsent(event.id);
       
-      // Update status event jika belum COMPLETED/CANCELLED
+      // Update event status if not already COMPLETED or CANCELLED
       if (event.status !== 'CANCELLED') {
         await prisma.event.update({
           where: { id: event.id },

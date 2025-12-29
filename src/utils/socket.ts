@@ -1,12 +1,12 @@
 /**
- * File: socket.ts
- * Author: eventFlow Team
- * Deskripsi: Utility untuk inisialisasi dan manajemen koneksi socket.io pada aplikasi eventFlow.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-11
- * Versi: 1.1.1
- * Lisensi: MIT
- * Dependensi: Socket.io
+ * @file socket.ts
+ * @module utils/socket
+ * @author eventFlow Team
+ * @description Utility untuk inisialisasi dan manajemen koneksi socket.io pada aplikasi eventFlow.
+ * @created 2025-11-10
+ * @version 1.1.1
+ * @license UNLICENSED
+ * @dependency Socket.io
  */
 import { Server as SocketIOServer } from 'socket.io';
 import { EventFullNotification } from '../types/socket';

@@ -1,10 +1,13 @@
+
 /**
- * File: chatRoutes.ts
- * Author: eventFlow Team
- * Deskripsi: Routing endpoint chat event (group chat, dsb) dengan dokumentasi Swagger.
- * Dibuat: 2025-11-11
- * Versi: 1.0.0
- * Lisensi: MIT
+ * @file chatRoutes.ts
+ * @module routes/chatRoutes
+ * @author eventFlow Team
+ * @description Endpoints for event chat management (group chat, etc.).
+ * @created 2025-11-11
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/chatController
  */
 import { Router } from 'express';
 import {

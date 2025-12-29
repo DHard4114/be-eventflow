@@ -1,12 +1,12 @@
 /**
- * File: requireAuth.ts
- * Author: eventFlow Team
- * Deskripsi: Middleware dan utilitas untuk validasi autentikasi JWT pada setiap request API.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, JWT
+ * @file requireAuth.ts
+ * @module utils/requireAuth
+ * @author eventFlow Team
+ * @description Middleware dan utilitas untuk validasi autentikasi JWT pada setiap request API.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ./jwt
  */
 import { Request, Response, NextFunction } from 'express';
 import { verifyJwt } from './jwt';

@@ -1,12 +1,13 @@
 /**
- * File: participantLocationRepository.ts
- * Author: eventFlow Team
- * Deskripsi: Repository untuk query dan update lokasi peserta event di database.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Prisma
+ * @file participantLocationRepository.ts
+ * @module repositories/participantLocationRepository
+ * @author eventFlow Team
+ * @description Repository for querying and updating event participant locations in the database.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Prisma, ../config/prisma
  */
 import { prisma, ParticipantLocation } from '../config/prisma';
 

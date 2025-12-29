@@ -1,18 +1,19 @@
 /**
- * File: reportRepository.ts
- * Author: eventFlow Team
- * Deskripsi: Repository untuk query, pembuatan, dan update laporan event dengan enhanced features
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-15
- * Versi: 3.0.0
- * Lisensi: MIT
- * Dependensi: Prisma
+ * @file reportRepository.ts
+ * @module repositories/reportRepository
+ * @author eventFlow Team
+ * @description Repository for querying, creating, and updating event reports with enhanced features.
+ * @created 2025-11-10
+ * @lastModified 2025-11-15
+ * @version 1.0.2
+ * @license UNLICENSED
+ * @dependency Prisma
  */
 import { PrismaClient, Report, Prisma, ReportStatus, ReportCategory } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Type untuk Report dengan relasi
+// Report type with relations
 export type ReportWithRelations = Report & {
   reporter: {
     id: string;
@@ -28,9 +29,6 @@ export type ReportWithRelations = Report & {
   };
 };
 
-/**
- * Mencari report berdasarkan ID dengan detail lengkap
- */
 export const findReportById = async (id: string): Promise<ReportWithRelations | null> => {
   return prisma.report.findUnique({ 
     where: { id },
@@ -55,9 +53,6 @@ export const findReportById = async (id: string): Promise<ReportWithRelations | 
   });
 };
 
-/**
- * List semua reports di event (admin view)
- */
 export const listReports = async (eventId: string): Promise<ReportWithRelations[]> => {
   return prisma.report.findMany({ 
     where: { eventId },
@@ -79,9 +74,6 @@ export const listReports = async (eventId: string): Promise<ReportWithRelations[
   });
 };
 
-/**
- * List reports untuk organizer dengan prioritas
- */
 export const listEventReportsForOrganizer = async (
   eventId: string,
   filters?: {
@@ -123,9 +115,6 @@ export const listEventReportsForOrganizer = async (
   });
 };
 
-/**
- * List reports participant sendiri
- */
 export const listEventReportsForParticipant = async (
   eventId: string, 
   userId: string
@@ -148,9 +137,6 @@ export const listEventReportsForParticipant = async (
   });
 };
 
-/**
- * Membuat report baru
- */
 export const createReport = async (
   data: Prisma.ReportCreateInput
 ): Promise<ReportWithRelations> => {
@@ -176,9 +162,6 @@ export const createReport = async (
   });
 };
 
-/**
- * Update report (status, notes, etc)
- */
 export const updateReport = async (
   id: string, 
   data: Prisma.ReportUpdateInput
@@ -205,18 +188,12 @@ export const updateReport = async (
   });
 };
 
-/**
- * Hapus report
- */
 export const deleteReport = async (id: string): Promise<Report> => {
   return prisma.report.delete({ 
     where: { id }
   });
 };
 
-/**
- * Statistik report untuk dashboard organizer
- */
 export const getReportStats = async (eventId: string) => {
   const [stats, total, recent] = await Promise.all([
     prisma.report.groupBy({
@@ -273,9 +250,6 @@ export const getReportStats = async (eventId: string) => {
   };
 };
 
-/**
- * Get urgent reports (SECURITY category yang masih PENDING)
- */
 export const getUrgentReports = async (eventId: string): Promise<ReportWithRelations[]> => {
   return prisma.report.findMany({
     where: {
@@ -297,9 +271,6 @@ export const getUrgentReports = async (eventId: string): Promise<ReportWithRelat
   });
 };
 
-/**
- * Batch update status multiple reports
- */
 export const batchUpdateReportStatus = async (
   reportIds: string[],
   status: ReportStatus
@@ -314,9 +285,6 @@ export const batchUpdateReportStatus = async (
   return result.count;
 };
 
-/**
- * Get reports dalam radius tertentu (untuk spatial analysis)
- */
 export const getReportsInRadius = async (
   eventId: string,
   centerLat: number,

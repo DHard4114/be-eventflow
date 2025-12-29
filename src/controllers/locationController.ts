@@ -1,13 +1,14 @@
 /**
- * File: locationController.ts
- * Author: eventFlow Team
- * Deskripsi: Mengelola endpoint update lokasi peserta event, pengambilan lokasi user, dan list lokasi peserta.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, Prisma, JWT
-*/
+ * @file locationController.ts
+ * @module controllers/locationController
+ * @author eventFlow Team
+ * @description Handles endpoints for updating event participant location, retrieving user location, and listing participant locations.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Prisma, JWT, ../repositories/participantLocationRepository, ../repositories/virtualAreaRepository, ../repositories/eventParticipantRepository, ../repositories/eventRepository, ../repositories/userRepository, ../utils/geo, ../utils/socket, ../utils/baseResponse, ../types/jwtPayload, ../utils/jwt
+ */
 import { Request, Response } from 'express';
 import {
   upsertParticipantLocation,
@@ -39,9 +40,9 @@ export const updateLocation = async (req: Request, res: Response) => {
       return res.status(400).json(errorResponse('Invalid coordinates'));
     }
     // --- Geofence Logic ---
-    // 1. Ambil semua area virtual event
+    // 1. Get all virtual areas for the event
     const areas = await listVirtualAreas(eventId);
-    // 2. Cek apakah lokasi user di dalam area
+    // 2. Check if user location is inside any area
     const isInside = areas.some(area => {
       try {
         return isLocationInsideGeofence({ latitude, longitude }, JSON.parse(area.area).coordinates);
@@ -51,30 +52,28 @@ export const updateLocation = async (req: Request, res: Response) => {
     });
     const status = isInside ? 'INSIDE' : 'OUTSIDE';
 
-    // 3. Ambil status sebelumnya
+    // 3. Get previous geofence status
     const prevLocation = await findParticipantLocation(payload.userId, eventId);
     const prevStatus = prevLocation?.lastGeofenceStatus;
 
-    // 4. Auto Check-in Logic: Jika masuk zona saat event berlangsung
-    // Trigger: saat transisi masuk zona ATAU sudah di dalam zona tapi masih PENDING
+    // 4. Auto Check-in Logic: If entering zone while event is ongoing
+    // Trigger: transition from OUTSIDE to INSIDE, or first time, or fallback if still INSIDE
     const shouldCheckIn = 
-      (prevStatus === 'OUTSIDE' && status === 'INSIDE') || // Baru masuk
-      (!prevStatus && status === 'INSIDE') ||               // Pertama kali
-      (status === 'INSIDE');                                // Sudah di dalam (fallback)
+      (prevStatus === 'OUTSIDE' && status === 'INSIDE') ||
+      (!prevStatus && status === 'INSIDE') ||
+      (status === 'INSIDE');
     
     if (shouldCheckIn) {
       const event = await findEventById(eventId);
       if (event) {
         const now = new Date();
         const isEventOngoing = now >= event.startTime && now <= event.endTime && event.status === 'ONGOING';
-        
         if (isEventOngoing) {
-          // Cek apakah masih PENDING (belum check-in)
+          // Check if still PENDING (not checked-in)
           const { findActiveEventParticipant } = await import('../repositories/eventParticipantRepository');
           const participant = await findActiveEventParticipant(payload.userId, eventId);
-          
           if (participant && participant.attendanceStatus === 'PENDING') {
-            // Auto check-in: update attendance status ke PRESENT
+            // Auto check-in: update attendance status to PRESENT
             await updateAttendanceStatus(
               payload.userId,
               eventId,
@@ -87,30 +86,29 @@ export const updateLocation = async (req: Request, res: Response) => {
       }
     }
 
-    // 5. Jika keluar zona, trigger alert
+    // 5. If user leaves the zone, trigger alert
     if (prevStatus === 'INSIDE' && status === 'OUTSIDE') {
       emitGeofenceEvent(eventId, {
         userId: payload.userId,
-        status: 'outside', // sesuai tipe GeofencePayload
+        status: 'outside',
         timestamp: new Date(),
       });
-      // TODO: Buat notifikasi SECURITY_ALERT ke organizer di sini jika ada sistem notifikasi
+      // TODO: Create SECURITY_ALERT notification to organizer here if notification system exists
     }
 
-    // 6. Simpan lokasi dan status baru
+    // 6. Save new location and status
     const location = await upsertParticipantLocation(
       payload.userId,
       eventId,
       latitude,
       longitude,
-      status // <-- simpan status baru
+      status
     );
 
     // Get user info for socket payload
-    
     const user = await findUserById(payload.userId);
 
-    // Emit location update dengan data lengkap
+    // Emit location update with complete data
     emitLocationUpdate(eventId, {
       userId: payload.userId,
       eventId,

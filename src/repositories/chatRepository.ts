@@ -1,11 +1,13 @@
+
 /**
- * File: chatRepository.ts
- * Author: eventFlow Team
- * Deskripsi: Repository untuk operasi database ChatMessage (group chat event, DM, dsb).
- * Dibuat: 2025-11-11
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Prisma
+ * @file chatRepository.ts
+ * @module repositories/chatRepository
+ * @author eventFlow Team
+ * @description Repository for ChatMessage database operations (group chat event, DM, etc.).
+ * @created 2025-11-11
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Prisma
  */
 import { prisma } from '../config/prisma';
 

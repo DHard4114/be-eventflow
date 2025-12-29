@@ -1,12 +1,14 @@
+
 /**
- * File: pollRepository.ts
- * Author: eventFlow Team
- * Deskripsi: Repository untuk operasi database Poll, PollOption, dan PollVote dengan optimized counting.
- * Dibuat: 2025-11-11
- * Versi: 2.0.0
- * Lisensi: MIT
- * Dependensi: Prisma
-*/
+ * @file pollRepository.ts
+ * @module repositories/pollRepository
+ * @author eventFlow Team
+ * @description Repository for Poll, PollOption, and PollVote database operations with optimized counting.
+ * @created 2025-11-11
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Prisma
+ */
 import { prisma, PollOption, PollVote, Poll } from '../config/prisma';
 
 export const createPoll = async (data: {

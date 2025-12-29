@@ -1,12 +1,13 @@
+
 /**
- * File: swagger.ts
- * Author: eventFlow Team
- * Deskripsi: Konfigurasi Swagger untuk dokumentasi API backend eventFlow.
- * Dibuat: 2025-11-11
- * Terakhir Diubah: 2025-11-11
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: swagger-jsdoc, swagger-ui-express
+ * @file swagger.ts
+ * @module config/swagger
+ * @author eventFlow Team
+ * @description Swagger configuration for eventFlow backend API documentation.
+ * @created 2025-11-11
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency swagger-jsdoc, swagger-ui-express
  */
 import swaggerJSDoc from 'swagger-jsdoc';
 
@@ -19,7 +20,7 @@ const options: swaggerJSDoc.Options = {
       description: 'API documentation for eventFlow backend',
       contact: {
         name: 'eventFlow Team',
-        email: 'support@eventflow.com', // opsional
+        email: 'support@eventflow.com',
       },
       license: {
         name: 'MIT',
@@ -32,7 +33,7 @@ const options: swaggerJSDoc.Options = {
         description: 'Development server',
       },
       {
-        url: 'https://api.eventflow.com', // opsional: production server
+        url: 'https://api.eventflow.com',
         description: 'Production server',
       },
     ],
@@ -46,7 +47,6 @@ const options: swaggerJSDoc.Options = {
         },
       },
       schemas: {
-        // Schema global yang bisa dipakai di semua endpoint
         User: {
           type: 'object',
           properties: {
@@ -116,7 +116,6 @@ const options: swaggerJSDoc.Options = {
         },
       },
       responses: {
-        // Response global yang bisa dipakai di semua endpoint
         UnauthorizedError: {
           description: 'Token tidak valid atau tidak ada',
           content: {
@@ -184,9 +183,9 @@ const options: swaggerJSDoc.Options = {
   },
   apis: [
     './src/routes/*.ts',
-    './src/routes/**/*.ts', // untuk nested routes
+    './src/routes/**/*.ts', // nested routes
     './src/controllers/*.ts',
-    './src/controllers/**/*.ts', // untuk nested controllers
+    './src/controllers/**/*.ts', // nested controllers
   ],
 };
 

@@ -1,14 +1,13 @@
-;
 /**
- * File: virtualAreaController.ts
- * Author: eventFlow Team
- * Deskripsi: Mengelola endpoint area virtual (geofence) event, termasuk pembuatan, update, pengambilan, dan penghapusan area.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, Prisma, JWT
-*/
+ * @file virtualAreaController.ts
+ * @module controllers/virtualAreaController
+ * @author eventFlow Team
+ * @description Handles endpoints for CRUD operations on virtual areas (geofence) for events.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license MIT
+ * @dependency Express, Prisma, JWT
+ */
 import { Request, Response } from 'express';
 import { prisma } from '../config/prisma';
 import {
@@ -24,9 +23,6 @@ import { baseResponse } from '../utils/baseResponse';
 import { errorResponse } from '../utils/baseResponse';
 import { JWTPayload } from '../types/jwtPayload';
 import { verifyJwt } from '../utils/jwt';
-
-
-// Endpoint: GET /events/:eventId/virtual-area/current?lat=...&lng=...
 export const getCurrentVirtualArea = async (req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
@@ -39,7 +35,6 @@ export const getCurrentVirtualArea = async (req: Request, res: Response) => {
     if (!eventId || !userId) {
       return res.status(400).json({ success: false, message: 'eventId dan userId wajib diisi' });
     }
-    // Ambil lokasi user dari ParticipantLocation
     const { prisma } = require('../config/prisma');
     const location = await prisma.participantLocation.findUnique({ where: { userId_eventId: { userId, eventId } } });
     if (!location) {
@@ -62,11 +57,9 @@ export const createVirtualArea = async (req: Request, res: Response) => {
     const { name, area, color } = req.body;
     if (!name || !area || !color)
       return res.status(400).json(errorResponse('Missing fields'));
-    // Pastikan area dikirim sebagai GeoJSON Polygon string
     if (!area.type || area.type !== 'Polygon' || !Array.isArray(area.coordinates)) {
       return res.status(400).json(errorResponse('Area must be valid GeoJSON Polygon'));
     }
-    // Cek eventId valid
     const event = await prisma.event.findUnique({ where: { id: eventId } });
     if (!event) {
       return res.status(400).json(errorResponse('Event tidak ditemukan'));
@@ -77,7 +70,6 @@ export const createVirtualArea = async (req: Request, res: Response) => {
       color,
       eventId
     });
-    // area hasil dari repo diasumsikan string GeoJSON
     const virtualArea = {
       id: created.id,
       name: created.name,
@@ -87,7 +79,6 @@ export const createVirtualArea = async (req: Request, res: Response) => {
     };
     res.json(baseResponse({ success: true, data: virtualArea }));
   } catch (err) {
-    console.error('Create VirtualArea error:', err);
     res.status(500).json(errorResponse(err));
   }
 };
@@ -96,7 +87,6 @@ export const getVirtualAreas = async (req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
     const repoAreas = await listVirtualAreas(eventId);
-    // Diasumsikan repo sudah mengembalikan area sebagai string GeoJSON
     const areas = repoAreas.map(a => ({
       id: a.id,
       name: a.name,
@@ -143,7 +133,6 @@ export const searchVirtualAreaByLocation = async (req: Request, res: Response) =
     if (!area) {
       return res.status(404).json(errorResponse('No area contains this location'));
     }
-    // area.area diasumsikan string GeoJSON
     const result = {
       id: area.id,
       name: area.name,
@@ -167,6 +156,7 @@ export const updateVirtualArea = async (req: Request, res: Response) => {
     const data = req.body;
     let updateData = { ...data };
     if (data.area) {
+      // Ensure area is a valid GeoJSON Polygon when updating
       if (!data.area.type || data.area.type !== 'Polygon' || !Array.isArray(data.area.coordinates)) {
         return res.status(400).json(errorResponse('Area must be valid GeoJSON Polygon'));
       }
@@ -182,7 +172,6 @@ export const updateVirtualArea = async (req: Request, res: Response) => {
     };
     res.json(baseResponse({ success: true, data: virtualArea }));
   } catch (err) {
-    console.error('Update VirtualArea error:', err);
     res.status(500).json(errorResponse(err));
   }
 };

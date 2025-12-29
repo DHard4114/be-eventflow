@@ -1,15 +1,16 @@
 
 
 /**
- * File: notificationController.ts
- * Author: eventFlow Team
- * Deskripsi: Mengelola endpoint broadcast notifikasi event, pengambilan dan update status notifikasi user.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, Prisma, JWT
-*/
+ * @file notificationController.ts
+ * @module controllers/notificationController
+ * @author eventFlow Team
+ * @description Handles event notification broadcast endpoints, retrieval, and user notification status updates.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Prisma, JWT, ../repositories/notificationRepository, ../repositories/userNotificationRepository, ../config/prisma, ../utils/baseResponse, ../utils/jwt, ../types/jwtPayload, ../utils/socket, ../types/notification, ../repositories/eventRepository, ../repositories/eventParticipantRepository
+ */
 import { Request, Response } from 'express';
 import { listNotifications, createNotification } from '../repositories/notificationRepository';
 import { createUserNotification } from '../repositories/userNotificationRepository';

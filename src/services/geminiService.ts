@@ -1,6 +1,13 @@
+
 /**
- * Analisis insiden event secara mendalam dan komprehensif (NLP, geospasial, media) menggunakan Gemini 2.5 Flash
- * Output: JSON siap simpan ke ReportAIResult
+ * @file geminiService.ts
+ * @module services/geminiService
+ * @author eventFlow Team
+ * @description In-depth event incident analysis (NLP, geospatial, media) using Gemini 2.5 Flash. Output: JSON ready for ReportAIResult.
+ * @created 2025-11-11
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency @google/genai, dotenv
  */
 
 import { GoogleGenAI } from '@google/genai';

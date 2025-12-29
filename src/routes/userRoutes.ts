@@ -1,7 +1,12 @@
 /**
- * @file User Routes
+ * @file userRoutes.ts
+ * @module routes/userRoutes
  * @author eventFlow Team
- * @description Endpoint untuk manajemen profil user (get, update, delete)
+ * @description Endpoints for user profile management (get, update, delete).
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/userController, multer
  */
 
 import { Router } from 'express';
@@ -20,13 +25,13 @@ const router = Router();
  * @swagger
  * /users/me:
  *   get:
- *     summary: Ambil profil user saat ini
+ *     summary: Get current user profile
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Profil user
+ *         description: User profile
  *       401:
  *         description: Unauthorized
  */
@@ -36,13 +41,13 @@ router.get('/me', getProfile);
  * @swagger
  * /users/me:
  *   patch:
- *     summary: Update profil user (partial update - semua field optional)
+ *     summary: Update user profile (partial update - all fields optional)
  *     description: |
- *       Bisa update foto saja, name saja, phoneNumber saja, atau kombinasi.
- *       Field yang tidak dikirim tidak akan berubah.
- *       **Cara pakai di Swagger:**
- *       - Centang checkbox field yang mau diupdate
- *       - Kosongkan field yang tidak mau diubah
+ *       You can update only the avatar, only the name, only the phoneNumber, or any combination.
+ *       Fields not sent will remain unchanged.
+ *       **How to use in Swagger:**
+ *       - Check the checkbox for the fields you want to update
+ *       - Leave fields you do not want to change empty
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
@@ -54,19 +59,19 @@ router.get('/me', getProfile);
  *             properties:
  *               name:
  *                 type: string
- *                 description: Nama user (optional)
+ *                 description: User name (optional)
  *                 example: "John Doe"
  *               phoneNumber:
  *                 type: string
- *                 description: Nomor telepon user (optional)
+ *                 description: User phone number (optional)
  *                 example: "+6281234567890"
  *               avatar:
  *                 type: string
  *                 format: binary
- *                 description: File avatar user - image (optional)
+ *                 description: User avatar file - image (optional)
  *     responses:
  *       200:
- *         description: Profil user berhasil diupdate
+ *         description: User profile updated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -88,13 +93,13 @@ router.patch('/me', upload.single('avatar'), updateProfile);
  * @swagger
  * /users/me:
  *   delete:
- *     summary: Hapus user
+ *     summary: Delete user
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: User berhasil dihapus
+ *         description: User deleted successfully
  *       401:
  *         description: Unauthorized
  */

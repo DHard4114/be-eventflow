@@ -1,3 +1,13 @@
+/**
+ * @file handleMulterError.ts
+ * @module utils/handleMulterError
+ * @author eventFlow Team
+ * @description Middleware untuk menangani error upload file dari multer.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Multer
+ */
 import { Request, Response, NextFunction } from 'express';
 import { MulterError } from 'multer';
 

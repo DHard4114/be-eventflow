@@ -1,12 +1,13 @@
 /**
- * File: reportController.ts
- * Author: eventFlow Team
- * Deskripsi: Enhanced controller untuk laporan dengan real-time broadcast dan notifikasi
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-15
- * Versi: 3.0.0
- * Lisensi: MIT
- * Dependensi: Express, Prisma, Cloudinary, JWT, Socket.io
+ * @file reportController.ts
+ * @module controllers/reportController
+ * @author eventFlow Team
+ * @description Enhanced controller for reports with real-time broadcast and notifications.
+ * @created 2025-11-10
+ * @lastModified 2025-11-15
+ * @version 3.0.0
+ * @license UNLICENSED
+ * @dependency Express, Prisma, Cloudinary, JWT, Socket.io, ../repositories/reportRepository, ../utils/baseResponse, ../utils/jwt, ../utils/cloudinary, ../utils/socket, ../repositories/notificationRepository, ../repositories/eventRepository, ../repositories/eventParticipantRepository, ../services/geminiService, ../repositories/reportAIResultRepository
  */
 
 import { Request, Response } from 'express';

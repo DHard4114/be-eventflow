@@ -1,7 +1,16 @@
+/**
+ * @file importantSpotController.ts
+ * @module controllers/importantSpotController
+ * @author eventFlow Team
+ * @description Handles endpoints for CRUD operations on important spots within an event.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../repositories/importantSpotRepository, ../utils/baseResponse
+ */
 import { Request, Response } from 'express';
 
 import { ImportantSpotRepository } from '../repositories/importantSpotRepository';
-// import { SpotType } from '@prisma/client';
 import { baseResponse, errorResponse } from '../utils/baseResponse';
 
 const repo = new ImportantSpotRepository();
@@ -47,12 +56,10 @@ export async function updateSpot(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const data = req.body;
-    console.log('Update spot called - ID:', id, 'Data:', data);
     if (!id) return res.status(400).json(baseResponse({ success: false, message: 'Missing spot id' }));
     const spot = await repo.updateSpot(id, data);
     return res.json(baseResponse({ success: true, message: 'Spot updated', data: spot }));
   } catch (err) {
-    console.error('Update spot error:', err);
     return res.status(500).json(errorResponse(err));
   }
 }

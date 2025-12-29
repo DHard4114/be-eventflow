@@ -1,13 +1,14 @@
 /**
- * File: eventParticipantRepository.ts
- * Author: eventFlow Team
- * Deskripsi: Repository untuk query dan update data partisipan event di database.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Prisma
-*/
+ * @file eventParticipantRepository.ts
+ * @module repositories/eventParticipantRepository
+ * @author eventFlow Team
+ * @description Repository for querying and updating event participant data in the database.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Prisma, ../config/prisma
+ */
 import { prisma, EventParticipant } from '../config/prisma';
 
 // Cek apakah user adalah peserta aktif event
@@ -34,13 +35,11 @@ export const listEventParticipants = async (
   excludeOrganizer: boolean = false
 ): Promise<EventParticipant[]> => {
   if (excludeOrganizer) {
-    // Get event to find organizer ID
     const event = await prisma.event.findUnique({
       where: { id: eventId },
       select: { organizerId: true }
     });
     if (!event) return [];
-    
     return prisma.eventParticipant.findMany({
       where: { 
         eventId, 
@@ -50,7 +49,6 @@ export const listEventParticipants = async (
       include: { user: true } 
     });
   }
-  
   return prisma.eventParticipant.findMany({
     where: { eventId, isActive: true },
     include: { user: true } 
@@ -88,13 +86,11 @@ export const joinOrReactivateEventParticipant = async (
     where: { userId_eventId: { userId, eventId } },
   });
   if (existing) {
-    // Reactivate and reset leftAt
     return prisma.eventParticipant.update({
       where: { userId_eventId: { userId, eventId } },
       data: { isActive: true, joinedAt: new Date(), leftAt: null },
     });
   } else {
-    // Create new single record
     return prisma.eventParticipant.create({
       data: { userId, eventId, isActive: true, joinedAt: new Date(), leftAt: null },
     });
@@ -142,7 +138,6 @@ export const updateAttendanceStatus = async (
     where: { userId_eventId: { userId, eventId } },
   });
   if (!existing) return null;
-
   return prisma.eventParticipant.update({
     where: { userId_eventId: { userId, eventId } },
     data: {
@@ -154,7 +149,6 @@ export const updateAttendanceStatus = async (
 
 // Get attendance statistics untuk event
 export const getAttendanceStats = async (eventId: string) => {
-  // Get event to find organizer ID
   const event = await prisma.event.findUnique({
     where: { id: eventId },
     select: { organizerId: true }
@@ -169,12 +163,11 @@ export const getAttendanceStats = async (eventId: string) => {
       participants: [],
     };
   }
-
   const participants = await prisma.eventParticipant.findMany({
     where: { 
       eventId, 
       isActive: true,
-      userId: { not: event.organizerId } // Exclude organizer
+      userId: { not: event.organizerId }
     },
     include: {
       user: {
@@ -188,12 +181,10 @@ export const getAttendanceStats = async (eventId: string) => {
     },
     orderBy: { joinedAt: 'asc' },
   });
-
   const total = participants.length;
   const present = participants.filter(p => p.attendanceStatus === 'PRESENT').length;
   const absent = participants.filter(p => p.attendanceStatus === 'ABSENT').length;
   const pending = participants.filter(p => p.attendanceStatus === 'PENDING').length;
-
   return {
     totalParticipants: total,
     present,

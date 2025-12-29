@@ -1,12 +1,13 @@
+
 /**
- * File: env.ts
- * Author: eventFlow Team
- * Deskripsi: Utility untuk membaca dan mengelola variabel lingkungan (environment variables) aplikasi.
- * Dibuat: 2025-11-11
- * Terakhir Diubah: 2025-11-11
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: dotenv
+ * @file env.ts
+ * @module config/env
+ * @author eventFlow Team
+ * @description Utility for reading and managing application environment variables.
+ * @created 2025-11-11
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency dotenv
  */
 import dotenv from 'dotenv';
 dotenv.config();

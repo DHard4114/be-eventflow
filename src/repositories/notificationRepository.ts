@@ -1,12 +1,13 @@
 /**
- * File: notificationRepository.ts
- * Author: eventFlow Team
- * Deskripsi: Repository untuk query, pembuatan, dan update notifikasi event/user di database.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Prisma
+ * @file notificationRepository.ts
+ * @module repositories/notificationRepository
+ * @author eventFlow Team
+ * @description Repository for querying, creating, and updating event/user notifications in the database.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Prisma
  */
 import { prisma, Prisma, Notification, NotificationType} from '../config/prisma';
 

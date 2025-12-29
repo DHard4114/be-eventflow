@@ -1,13 +1,13 @@
 /**
- * File: geo.ts
- * @author: eventFlow Team
- * Deskripsi: Utility untuk perhitungan geolokasi, jarak, dan logika geofence pada event.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: -
-*/
+ * @file geo.ts
+ * @module utils/geo
+ * @author eventFlow Team
+ * @description Utility untuk perhitungan geolokasi, jarak, dan logika geofence pada event.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency -
+ */
 
 import { distance as turfDistance, booleanPointInPolygon } from '@turf/turf';
 

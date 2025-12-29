@@ -1,12 +1,13 @@
 /**
- * File: authController.ts
- * Author: eventFlow Team
- * Deskripsi: Mengelola endpoint autentikasi user, registrasi, login, update data, dan penghapusan akun.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, Prisma, JWT
+ * @file authController.ts
+ * @module controllers/authController
+ * @author eventFlow Team
+ * @description Handles user authentication endpoints, registration, login, data update, and account deletion.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Prisma, JWT, bcryptjs, ../repositories/userRepository, ../utils/baseResponse, ../utils/jwt, ../types/user, ../types/jwtPayload
  */
 import { Request, Response } from 'express';
 import {
@@ -123,6 +124,7 @@ export const register = async (req: Request, res: Response) => {
       phoneNumber: userRaw.phoneNumber === null ? undefined : userRaw.phoneNumber,
       googleId: userRaw.googleId === null ? undefined : userRaw.googleId,
     };
+    // Uncomment below to return JWT token after registration
     // const token = signJwt({ userId: user.id, role: user.role });
     res.json(baseResponse({ success: true, data: { user } }));
   } catch (err) {

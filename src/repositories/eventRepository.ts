@@ -1,12 +1,13 @@
 /**
- * File: eventRepository.ts
- * Author: eventFlow Team
- * Deskripsi: Repository untuk query, pembuatan, update, dan penghapusan event di database.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Prisma
+ * @file eventRepository.ts
+ * @module repositories/eventRepository
+ * @author eventFlow Team
+ * @description Repository for querying, creating, updating, and deleting events in the database.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Prisma
  */
 import { prisma, Prisma, Event } from '../config/prisma';
 

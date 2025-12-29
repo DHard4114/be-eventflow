@@ -1,7 +1,13 @@
+
 /**
- * @file Auth Routes
+ * @file authRoutes.ts
+ * @module routes/authRoutes
  * @author eventFlow Team
- * @description Endpoint untuk autentikasi user (register, login, update, delete)
+ * @description Endpoints for user authentication (register, login, update, delete).
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/authController, ../utils/requireAuth
  */
 
 import { Router } from 'express';
@@ -20,8 +26,8 @@ const router = Router();
  * @swagger
  * /auths/register:
  *   post:
- *     summary: Register user baru
- *     description: Registrasi user baru ke eventFlow.
+ *     summary: Register new user
+ *     description: Register a new user to eventFlow.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -36,23 +42,23 @@ const router = Router();
  *             properties:
  *               name:
  *                 type: string
- *                 description: Nama lengkap user
+ *                 description: Full name of the user
  *                 example: John Doe
  *               email:
  *                 type: string
- *                 description: Email user
+ *                 description: User email
  *                 example: john@example.com
  *               password:
  *                 type: string
- *                 description: Password user (minimal 6 karakter)
+ *                 description: User password (minimum 6 characters)
  *                 example: password123
  *               phoneNumber:
  *                 type: string
- *                 description: Nomor telepon user
+ *                 description: User phone number
  *                 example: "081234567890"
  *     responses:
  *       200:
- *         description: User berhasil diregistrasi
+ *         description: User registered successfully
  *         content:
  *           application/json:
  *             schema:
@@ -67,7 +73,7 @@ const router = Router();
  *                   type: string
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       400:
- *         description: Data tidak lengkap
+ *         description: Incomplete data
  *         content:
  *           application/json:
  *             schema:
@@ -76,7 +82,7 @@ const router = Router();
  *               error: Bad Request
  *               message: All fields are required
  *       409:
- *         description: Email sudah terdaftar
+ *         description: Email already registered
  *         content:
  *           application/json:
  *             schema:
@@ -91,8 +97,8 @@ router.post('/register', register);
  * @swagger
  * /auths/register-as-organizer:
  *   post:
- *     summary: Register Dashboard
- *     description: Registrasi Organizer baru ke eventFlow.
+ *     summary: Register as Organizer
+ *     description: Register a new Organizer to eventFlow.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -107,23 +113,23 @@ router.post('/register', register);
  *             properties:
  *               name:
  *                 type: string
- *                 description: Nama lengkap user
+ *                 description: Full name of the user
  *                 example: John Doe
  *               email:
  *                 type: string
- *                 description: Email user
+ *                 description: User email
  *                 example: john@example.com
  *               password:
  *                 type: string
- *                 description: Password user (minimal 6 karakter)
+ *                 description: User password (minimum 6 characters)
  *                 example: password123
  *               phoneNumber:
  *                 type: string
- *                 description: Nomor telepon user
+ *                 description: User phone number
  *                 example: "081234567890"
  *     responses:
  *       200:
- *         description: User berhasil diregistrasi
+ *         description: User registered successfully
  *         content:
  *           application/json:
  *             schema:
@@ -138,7 +144,7 @@ router.post('/register', register);
  *                   type: string
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       400:
- *         description: Data tidak lengkap
+ *         description: Incomplete data
  *         content:
  *           application/json:
  *             schema:
@@ -147,7 +153,7 @@ router.post('/register', register);
  *               error: Bad Request
  *               message: All fields are required
  *       409:
- *         description: Email sudah terdaftar
+ *         description: Email already registered
  *         content:
  *           application/json:
  *             schema:
@@ -162,8 +168,8 @@ router.post('/register-as-organizer', regitserAsOrganizer);
  * @swagger
  * /auths/login:
  *   post:
- *     summary: Login user
- *     description: Login user ke eventFlow dan mendapatkan JWT token.
+ *     summary: User login
+ *     description: Log in to eventFlow and receive a JWT token.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -177,15 +183,15 @@ router.post('/register-as-organizer', regitserAsOrganizer);
  *             properties:
  *               email:
  *                 type: string
- *                 description: Email user
+ *                 description: User email
  *                 example: john@example.com
  *               password:
  *                 type: string
- *                 description: Password user
+ *                 description: User password
  *                 example: password123
  *     responses:
  *       200:
- *         description: Login berhasil
+ *         description: Login successful
  *         content:
  *           application/json:
  *             schema:
@@ -198,10 +204,10 @@ router.post('/register-as-organizer', regitserAsOrganizer);
  *                   $ref: '#/components/schemas/User'
  *                 token:
  *                   type: string
- *                   description: JWT token untuk autentikasi
+ *                   description: JWT token for authentication
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NSIsImlhdCI6MTYxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
  *       400:
- *         description: Data tidak lengkap
+ *         description: Incomplete data
  *         content:
  *           application/json:
  *             schema:
@@ -210,7 +216,7 @@ router.post('/register-as-organizer', regitserAsOrganizer);
  *               error: Bad Request
  *               message: Email and password are required
  *       401:
- *         description: Kredensial salah
+ *         description: Invalid credentials
  *         content:
  *           application/json:
  *             schema:
@@ -225,8 +231,8 @@ router.post('/login', login);
  * @swagger
  * /auths/update:
  *   patch:
- *     summary: Update data user
- *     description: Update data user yang sedang login. Memerlukan JWT token.
+ *     summary: Update user data
+ *     description: Update the data of the currently logged-in user. Requires JWT token.
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
@@ -239,23 +245,23 @@ router.post('/login', login);
  *             properties:
  *               name:
  *                 type: string
- *                 description: Nama user
+ *                 description: User name
  *                 example: John Doe Updated
  *               phoneNumber:
  *                 type: string
- *                 description: Nomor telepon user
+ *                 description: User phone number
  *                 example: "081234567890"
  *               avatarUrl:
  *                 type: string
- *                 description: URL avatar user
+ *                 description: User avatar URL
  *                 example: https://example.com/avatar.jpg
  *               password:
  *                 type: string
- *                 description: Password baru (opsional)
+ *                 description: New password (optional)
  *                 example: newpassword123
  *     responses:
  *       200:
- *         description: User berhasil diupdate
+ *         description: User updated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -267,7 +273,7 @@ router.post('/login', login);
  *                 user:
  *                   $ref: '#/components/schemas/User'
  *       401:
- *         description: Unauthorized - Token tidak valid atau tidak ada
+ *         description: Unauthorized - Invalid or missing token
  *         content:
  *           application/json:
  *             schema:
@@ -276,7 +282,7 @@ router.post('/login', login);
  *               error: Unauthorized
  *               message: Invalid or missing token
  *       400:
- *         description: Data tidak valid
+ *         description: Invalid data
  *         content:
  *           application/json:
  *             schema:
@@ -288,14 +294,14 @@ router.patch('/update', requireAuth, updateUser);
  * @swagger
  * /auths/delete:
  *   delete:
- *     summary: Hapus user
- *     description: Hapus user yang sedang login dari eventFlow. Memerlukan JWT token.
+ *     summary: Delete user
+ *     description: Delete the currently logged-in user from eventFlow. Requires JWT token.
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: User berhasil dihapus
+ *         description: User deleted successfully
  *         content:
  *           application/json:
  *             schema:
@@ -305,7 +311,7 @@ router.patch('/update', requireAuth, updateUser);
  *                   type: string
  *                   example: User deleted successfully
  *       401:
- *         description: Unauthorized - Token tidak valid atau tidak ada
+ *         description: Unauthorized - Invalid or missing token
  *         content:
  *           application/json:
  *             schema:

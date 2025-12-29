@@ -1,3 +1,15 @@
+
+/**
+ * @file reportAIResultRoutes.ts
+ * @module routes/reportAIResultRoutes
+ * @author eventFlow Team
+ * @description Endpoints for AI result management for reports.
+ * @created 2025-11-11
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/reportAIResultController
+ */
+
 import { Router } from 'express';
 import {
   getAIResultsByReport,

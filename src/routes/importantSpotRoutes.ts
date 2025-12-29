@@ -1,10 +1,13 @@
+
 /**
- * File: importantSpotRoutes.ts
- * Author: eventFlow Team
- * Deskripsi: Routing untuk endpoint CRUD ImportantSpot (titik penting event)
- * Dibuat: 2025-12-01
- * Versi: 1.0.0
- * Lisensi: MIT
+ * @file importantSpotRoutes.ts
+ * @module routes/importantSpotRoutes
+ * @author eventFlow Team
+ * @description Endpoints for CRUD ImportantSpot (event important spots).
+ * @created 2025-12-01
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/importantSpotController
  */
 import { Router } from 'express';
 import * as importantSpotController from '../controllers/importantSpotController';

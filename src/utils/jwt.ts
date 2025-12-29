@@ -1,12 +1,12 @@
 /**
- * File: jwt.ts
- * Author: eventFlow Team
- * Deskripsi: Utility untuk generate dan verifikasi token JWT pada autentikasi user.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: JWT
+ * @file jwt.ts
+ * @module utils/jwt
+ * @author eventFlow Team
+ * @description Utility untuk generate dan verifikasi token JWT pada autentikasi user.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency JWT
  */
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';

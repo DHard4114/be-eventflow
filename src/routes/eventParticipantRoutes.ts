@@ -1,8 +1,13 @@
 
 /**
  * @file eventParticipantRoutes.ts
+ * @module routes/eventParticipantRoutes
  * @author eventFlow Team
- * @description Endpoint khusus untuk EventParticipant CRUD dan query
+ * @description Endpoints for event participant CRUD and queries.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/eventParticipantController
  */
 import { Router } from 'express';
 

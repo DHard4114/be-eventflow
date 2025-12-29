@@ -1,12 +1,12 @@
 /**
- * File: cloudinary.ts
- * Author: eventFlow Team
- * Deskripsi: Enhanced utility untuk upload media (foto, video, audio) ke Cloudinary
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-15
- * Versi: 2.0.0
- * Lisensi: MIT
- * Dependensi: Cloudinary
+ * @file cloudinary.ts
+ * @module utils/cloudinary
+ * @author eventFlow Team
+ * @description Utility untuk upload media (foto, video, audio) ke Cloudinary
+ * @created 2025-11-10
+ * @version 2.0.0
+ * @license UNLICENSED
+ * @dependency Cloudinary
  */
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';

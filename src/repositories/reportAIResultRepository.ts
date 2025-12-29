@@ -1,3 +1,14 @@
+/**
+ * @file reportAIResultRepository.ts
+ * @module repositories/reportAIResultRepository
+ * @author eventFlow Team
+ * @description Repository for querying, creating, updating, and deleting AI result reports in the database.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Prisma, @prisma/client/runtime/library, ../types/ai
+ */
 import { prisma } from '../config/prisma';
 import { InputJsonValue } from '@prisma/client/runtime/library';
 import { ReportAIResultInput } from '../types/ai';

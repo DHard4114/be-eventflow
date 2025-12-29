@@ -1,8 +1,14 @@
+
 /**
- * @file User Notification Routes
+ * @file userNotificationRoutes.ts
+ * @module routes/userNotificationRoutes
  * @author eventFlow Team
- * @description Endpoint untuk notifikasi user (get, mark as read, unread count)
-*/
+ * @description Endpoints for user notification management (get, mark as read, unread count).
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/userNotificationController
+ */
 
 import { Router } from 'express';
 import {

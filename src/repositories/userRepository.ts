@@ -1,12 +1,13 @@
 /**
- * File: userRepository.ts
- * Author: eventFlow Team
- * Deskripsi: Repository untuk query dan update data user di database menggunakan Prisma.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Prisma
+ * @file userRepository.ts
+ * @module repositories/userRepository
+ * @author eventFlow Team
+ * @description Repository for querying and updating user data in the database using Prisma ORM.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Prisma
  */
 import { prisma, Prisma, User } from '../config/prisma';
 

@@ -1,12 +1,13 @@
+
 /**
- * File: prisma.ts
- * Author: eventFlow Team
- * Deskripsi: Konfigurasi dan inisialisasi Prisma Client untuk koneksi database PostgreSQL.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Prisma
+ * @file prisma.ts
+ * @module config/prisma
+ * @author eventFlow Team
+ * @description Prisma Client configuration and initialization for PostgreSQL database connection.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Prisma
  */
 import { PrismaClient } from '@prisma/client';
 

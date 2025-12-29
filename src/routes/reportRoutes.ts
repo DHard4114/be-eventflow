@@ -1,8 +1,13 @@
+
 /**
- * @file Report Routes - Enhanced dengan real-time features
+ * @file reportRoutes.ts
+ * @module routes/reportRoutes
  * @author eventFlow Team
- * @description Complete API endpoints untuk sistem laporan event
- * @version 3.0.0
+ * @description Endpoints for event report management (real-time features included).
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/reportController
  */
 
 import { Router } from 'express';

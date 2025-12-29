@@ -4,15 +4,7 @@ import fs from 'fs';
 
 const uploadDir = path.join(process.cwd(), 'uploads', 'reports');
 
-// Ensure directory exists on startup
-try {
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-    console.log('Upload directory created:', uploadDir);
-  }
-} catch (error) {
-  console.error('Failed to create upload directory:', error);
-}
+
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

@@ -1,12 +1,14 @@
+
 /**
- * File: pollController.ts
- * Author: eventFlow Team
- * Deskripsi: Mengelola endpoint voting/polling event dengan real-time Socket.io dan optimized counting.
- * Dibuat: 2025-11-11
- * Versi: 2.0.1
- * Lisensi: MIT
- * Dependensi: Express, Prisma, JWT, Socket.io
-*/
+ * @file pollController.ts
+ * @module controllers/pollController
+ * @author eventFlow Team
+ * @description Handles event voting/polling endpoints with real-time Socket.io and optimized counting.
+ * @created 2025-11-11
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Prisma, JWT, Socket.io
+ */
 import { Request, Response } from 'express';
 import { baseResponse } from '../utils/baseResponse';
 import { errorResponse } from '../utils/baseResponse';

@@ -1,13 +1,14 @@
+
 /**
- * File: deviceController.ts
- * Author: eventFlow Team
- * Deskripsi: Mengelola endpoint registrasi device, update token push, dan penghapusan device user.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, Prisma, JWT
-*/
+ * @file deviceController.ts
+ * @module controllers/deviceController
+ * @author eventFlow Team
+ * @description Handles device registration, push token update, and user device deletion endpoints.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Prisma, JWT
+ */
 import { Request, Response } from 'express';
 import {
   findDeviceByPushToken,

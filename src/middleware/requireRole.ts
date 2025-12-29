@@ -1,12 +1,13 @@
+
 /**
- * File: requireRole.ts
- * Author: eventFlow Team
- * Deskripsi: Middleware untuk validasi role user pada endpoint tertentu (misal: ORGANIZER, PARTICIPANT).
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, JWT
+ * @file requireRole.ts
+ * @module middleware/requireRole
+ * @author eventFlow Team
+ * @description Middleware for validating user roles on specific endpoints (e.g., ORGANIZER, PARTICIPANT).
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, JWT
  */
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/prisma';

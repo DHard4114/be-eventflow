@@ -1,12 +1,13 @@
+
 /**
- * File: googleAuthController.ts
- * Author: eventFlow Team
- * Deskripsi: Mengelola endpoint autentikasi Google OAuth untuk login dan registrasi user.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, Prisma, JWT, Google OAuth
+ * @file googleAuthController.ts
+ * @module controllers/googleAuthController
+ * @author eventFlow Team
+ * @description Handles Google OAuth authentication endpoints for user login and registration.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Prisma, JWT, Google OAuth
  */
 import { Request, Response } from 'express';
 import { prisma } from '../config/prisma';

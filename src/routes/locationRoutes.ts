@@ -1,7 +1,13 @@
+
 /**
- * @file Location Routes
+ * @file locationRoutes.ts
+ * @module routes/locationRoutes
  * @author eventFlow Team
- * @description Endpoint untuk manajemen lokasi peserta event (update, get lokasi)
+ * @description Endpoints for event participant location management (update, get location).
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/locationController
  */
 
 import { Router } from 'express';

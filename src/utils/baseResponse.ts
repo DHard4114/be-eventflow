@@ -1,12 +1,12 @@
 /**
- * File: baseResponse.ts
- * Author: eventFlow Team
- * Deskripsi: Utility untuk membentuk response API standar (success, error, data) agar konsisten di seluruh aplikasi.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: -
+ * @file baseResponse.ts
+ * @module utils/baseResponse
+ * @author eventFlow Team
+ * @description Utility untuk membentuk response API standar (success, error, data) agar konsisten di seluruh aplikasi.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency -
  */
 import { BaseResponse } from '../types/baseResponse';
 

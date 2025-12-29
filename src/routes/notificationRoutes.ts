@@ -1,8 +1,13 @@
 
 /**
- * @file Notification Routes
+ * @file notificationRoutes.ts
+ * @module routes/notificationRoutes
  * @author eventFlow Team
- * @description Endpoint untuk notifikasi event dan user
+ * @description Endpoints for event and user notification management.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/notificationController
  */
 
 import { Router } from 'express';

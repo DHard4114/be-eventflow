@@ -1,8 +1,14 @@
+
 /**
- * @file Virtual Area Routes
+ * @file virtualAreaRoutes.ts
+ * @module routes/virtualAreaRoutes
  * @author eventFlow Team
- * @description Endpoint untuk manajemen area virtual event (CRUD geofence)
-*/
+ * @description Endpoints for virtual area management (CRUD geofence).
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/virtualAreaController
+ */
 
 import { Router } from 'express';
 import {

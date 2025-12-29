@@ -1,12 +1,13 @@
+
 /**
- * File: errorHandler.ts
- * Author: eventFlow Team
- * Deskripsi: Middleware global untuk menangani error pada aplikasi Express. Mengirim response error terstruktur ke client.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express
+ * @file errorHandler.ts
+ * @module middleware/errorHandler
+ * @author eventFlow Team
+ * @description Global middleware for handling errors in the Express app. Sends structured error responses to the client.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express
  */
 import { Request, Response, NextFunction } from 'express';
 

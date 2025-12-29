@@ -1,25 +1,24 @@
 
 /**
- * File: virtualAreaRepository.ts
- * Author: eventFlow Team
- * Deskripsi: Repository untuk query, pembuatan, update, dan penghapusan area virtual event di database.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-13
- * Versi: 1.0.1
- * Lisensi: MIT
- * Dependensi: Prisma
- * 
- * FIX: Tambahkan double quotes untuk column names yang case-sensitive (eventId)
-*/
+ * @file virtualAreaRepository.ts
+ * @module repositories/virtualAreaRepository
+ * @author eventFlow Team
+ * @description Repository for querying, creating, updating, and deleting virtual event areas in the database.
+ * @created 2025-11-10
+ * @lastModified 2025-11-13
+ * @version 1.0.1
+ * @license UNLICENSED
+ * @dependency Prisma, ../config/prisma, ../types/virtualArea, ../utils/geo, cuid
+ */
 import { prisma } from '../config/prisma';
 import { RawVirtualArea } from '../types/virtualArea';
 import { isLocationInsideGeofence } from '../utils/geo';
 import cuid from 'cuid';
 
 
-// Cek area virtual tempat user berada berdasarkan lokasi
+// Check the virtual area where the user is located based on location
 export const getUserCurrentVirtualArea = async (eventId: string, latitude: number, longitude: number) => {
-  // Ambil semua area event sebagai GeoJSON
+  // Get all event areas as GeoJSON
   const areas = await prisma.$queryRawUnsafe<RawVirtualArea[]>(
     'SELECT id, name, ST_AsGeoJSON(area) as area, color, "eventId" FROM "VirtualArea" WHERE "eventId" = $1',
     eventId
@@ -77,9 +76,9 @@ export const listVirtualAreas = async (eventId: string): Promise<RawVirtualArea[
 };
 
 export const createVirtualArea = async (data: { name: string; area: string; color: string; eventId: string }): Promise<RawVirtualArea> => {
-  // Insert area sebagai geometry dari GeoJSON string
+  // Insert area as geometry from GeoJSON string
   const { name, area, color, eventId } = data;
-  // Generate CUID manual agar konsisten dengan Prisma default(cuid())
+  // Manually generate CUID to be consistent with Prisma default(cuid())
   const id = cuid();
   const result = await prisma.$queryRawUnsafe<RawVirtualArea[]>(
     'INSERT INTO "VirtualArea" (id, name, area, color, "eventId") VALUES ($1, $2, ST_GeomFromGeoJSON($3), $4, $5) RETURNING id, name, ST_AsGeoJSON(area) as area, color, "eventId"',

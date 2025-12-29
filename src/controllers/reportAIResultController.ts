@@ -1,3 +1,13 @@
+/**
+ * @file reportAISummaryController.ts
+ * @module controllers/reportAIResultController
+ * @author eventFlow Team
+ * @description Handles endpoints for CRUD operations on AI-generated report results.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../repositories/reportAIResultRepository
+ */
 import { Request, Response } from 'express';
 import {
   getReportAIResultsByReportId,
@@ -5,7 +15,6 @@ import {
   updateReportAIResult,
   deleteReportAIResult
 } from '../repositories/reportAIResultRepository';
-// ...existing code...
 
 
 export async function getAIResultsByReport(req: Request, res: Response) {

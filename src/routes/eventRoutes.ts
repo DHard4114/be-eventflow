@@ -1,8 +1,14 @@
+
 /**
- * @file Event Routes
+ * @file eventRoutes.ts
+ * @module routes/eventRoutes
  * @author eventFlow Team
- * @description Endpoint untuk manajemen event (CRUD, join event)
-**/
+ * @description Endpoints for event management (CRUD, join event).
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/eventController
+ */
 
 import { Router } from 'express';
 import { requireAuth } from '../utils/requireAuth';

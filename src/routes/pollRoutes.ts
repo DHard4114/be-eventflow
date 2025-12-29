@@ -1,11 +1,14 @@
+
 /**
- * File: pollRoutes.ts
- * Author: eventFlow Team
- * Deskripsi: Routing endpoint voting/polling event dengan real-time Socket.io support.
- * Dibuat: 2025-11-11
- * Versi: 2.0.0
- * Lisensi: MIT
-*/
+ * @file pollRoutes.ts
+ * @module routes/pollRoutes
+ * @author eventFlow Team
+ * @description Endpoints for event voting/polling management (real-time Socket.io support).
+ * @created 2025-11-11
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, ../controllers/pollController
+ */
 import { Router } from 'express';
 import {
   createPollController,

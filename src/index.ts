@@ -1,12 +1,13 @@
+
 /**
- * File: index.ts
- * Author: eventFlow Team
- * Deskripsi: Entry point utama backend eventFlow. Inisialisasi Express, Socket.io, Swagger, dan semua route API.
- * Dibuat: 2025-11-11
- * Terakhir Diubah: 2025-11-11
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, Socket.io, Swagger, Prisma
+ * @file index.ts
+ * @module index
+ * @author eventFlow Team
+ * @description Main entry point for eventFlow backend. Initializes Express, Socket.io, Swagger, and all API routes.
+ * @created 2025-11-11
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Socket.io, Swagger, Prisma
  */
 
 import express from 'express';
@@ -39,7 +40,6 @@ console.log('EventFlow backend starting...');
 const app = express();
 const server = http.createServer(app);
 
-// Middleware log semua request
 app.use((req, res, next) => {
   console.log(`[REQUEST] ${req.method} ${req.url}`);
   next();
@@ -67,9 +67,8 @@ setSocketInstance(io);
 
 app.use(express.json());
 
-// Swagger UI endpoint
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }', // opsional: hide topbar
+  customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: 'eventFlow API Docs',
 }));
 
@@ -95,7 +94,6 @@ app.use('/important-spots', importantSpotRoutes);
 
 io.on('connection', (socket) => {
   console.log('Socket connected:', socket.id);
-  // Client mengirim event 'joinEventRoom' dengan eventId
   socket.on('joinEventRoom', (eventId: string) => {
     socket.join(eventId);
     console.log(`Socket ${socket.id} joined event room ${eventId}`);
@@ -105,13 +103,10 @@ io.on('connection', (socket) => {
   });
 });
 
-// Error handler middleware (harus di paling akhir)
 app.use(errorHandler);
 
-// Export untuk Vercel serverless
 export default app;
 
-// Jika running lokal (bukan di Vercel)
 if (!process.env.VERCEL) {
   const PORT = env.PORT || 4000;
   server.listen(PORT, () => {

@@ -1,12 +1,13 @@
+
 /**
- * File: deviceRepository.ts
- * Author: eventFlow Team
- * Deskripsi: Repository untuk query dan update data device user di database.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Prisma
+ * @file deviceRepository.ts
+ * @module repositories/deviceRepository
+ * @author eventFlow Team
+ * @description Repository for querying and updating user device data in the database.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Prisma
  */
 import { prisma, Device } from '../config/prisma';
 

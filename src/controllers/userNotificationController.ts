@@ -1,13 +1,14 @@
 /**
- * File: userNotificationController.ts
- * Author: eventFlow Team
- * Deskripsi: Mengelola endpoint notifikasi user, termasuk pengambilan, penandaan sudah dibaca, dan jumlah notifikasi belum dibaca.
- * Dibuat: 2025-11-10
- * Terakhir Diubah: 2025-11-10
- * Versi: 1.0.0
- * Lisensi: MIT
- * Dependensi: Express, Prisma, JWT
-*/
+ * @file userNotificationController.ts
+ * @module controllers/userNotificationController
+ * @author eventFlow Team
+ * @description Handles user notification endpoints, including retrieval, marking as read, and unread notification count.
+ * @created 2025-11-10
+ * @lastModified 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency Express, Prisma, JWT, ../repositories/userNotificationRepository, ../repositories/notificationRepository, ../utils/baseResponse, ../types/notification, ../types/jwtPayload, ../utils/jwt
+ */
 import { Request, Response } from 'express';
 import {
   listUserNotifications,
@@ -26,7 +27,6 @@ import { Notification } from '../types/notification';
 import { JWTPayload } from '../types/jwtPayload';
 import { verifyJwt } from '../utils/jwt';
 
-// Get all notifications for current user
 export const getUserNotifications = async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -34,7 +34,6 @@ export const getUserNotifications = async (req: Request, res: Response) => {
     if (!payload)
       return res.status(401).json(errorResponse('Unauthorized'));
     const userNotifications = await listUserNotifications(payload.userId);
-    // Map UserNotification to Notification type (fetch notification details)
     const notifications: Notification[] = await Promise.all(
       userNotifications.map(async (un) => {
         const notification = await findNotificationById(un.notificationId);
@@ -53,7 +52,6 @@ export const getUserNotifications = async (req: Request, res: Response) => {
   }
 };
 
-// Mark notification as read
 export const markNotificationRead = async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -80,7 +78,6 @@ export const markNotificationRead = async (req: Request, res: Response) => {
   }
 };
 
-// Get unread notification count
 export const getListUnreadNotifications = async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -94,7 +91,6 @@ export const getListUnreadNotifications = async (req: Request, res: Response) =>
   }
 };
 
-//get read
 export const getListReadNotifications = async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -109,21 +105,13 @@ export const getListReadNotifications = async (req: Request, res: Response) => {
 };
 
 export const markAllNotificationsRead = async (req: Request, res: Response) => {
-  console.log('[markAllNotificationsRead] called');
   try {
     const token = req.headers.authorization?.split(' ')[1];
     const payload = token ? (verifyJwt(token) as JWTPayload) : null;
     if (!payload) {
       return res.status(401).json(errorResponse('Unauthorized'));
     }
-
-    console.log('[markAllNotificationsRead] userId:', payload.userId);
-    
-    // Panggil fungsi yang sudah diperbaiki
     const updatedCount = await markAllNotificationsAsRead(payload.userId);
-    
-    console.log('[markAllNotificationsRead] updatedCount:', updatedCount);
-    
     res.json(baseResponse({
       success: true,
       data: {
@@ -131,7 +119,6 @@ export const markAllNotificationsRead = async (req: Request, res: Response) => {
       }
     }));
   } catch (err) {
-    console.error('[markAllNotificationsRead] error:', err);
     res.status(500).json(errorResponse(err));
   }
 };
