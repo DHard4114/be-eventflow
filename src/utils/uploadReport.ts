@@ -1,8 +1,18 @@
+/**
+ * @file uploadReport.ts
+ * @module utils/uploadReport
+ * @author eventFlow Team
+ * @description Utility untuk upload file laporan ke folder uploads/reports.
+ * @created 2025-11-10
+ * @version 1.0.0
+ * @license UNLICENSED
+ * @dependency multer, path, fs
+ */
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
 
-const uploadDir = path.join(process.cwd(), 'uploads', 'reports');
+
+
 
 
 
